@@ -22,6 +22,15 @@
                     </div>
                     
                     <div class="mb-3">
+                        <label for="{{ form.abstract.id_for_label }}" class="form-label">Abstract</label>
+                        {{ form.abstract }}
+                        <div class="form-text">A brief summary of the document (used for searching).</div>
+                        {% if form.abstract.errors %}
+                            <div class="text-danger small mt-1">{{ form.abstract.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
                         <label for="{{ form.category.id_for_label }}" class="form-label">Category (Folder)</label>
                         {{ form.category }}
                         <div class="form-text">The document will be placed in this category's Google Drive folder.</div>

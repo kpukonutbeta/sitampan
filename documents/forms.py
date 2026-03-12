@@ -14,13 +14,23 @@ class CategoryForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['title', 'category', 'file']
+        fields = ['title', 'abstract', 'category', 'file']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'abstract': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'category': forms.Select(attrs={'class': 'form-select'}),
-            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.filter(allow_document_upload=True)
+
+class DocumentEditForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['title', 'abstract']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'abstract': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
