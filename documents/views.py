@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import Document, Category
 from .forms import DocumentForm, CategoryForm, DocumentEditForm
 from .drive_services import delete_drive_folder, rename_drive_file
+from .utils import rename_local_file
 
 from django.db.models import Q
 
@@ -65,11 +66,15 @@ def document_edit(request, pk):
             # Save the document changes
             updated_document.save()
             
-            # If title changed, rename the file in Google Drive asynchronously
-            if old_title != new_title and document.drive_file_id:
-                def rename_file():
-                    rename_drive_file(document.drive_file_id, new_title)
-                threading.Thread(target=rename_file).start()
+            # If title changed, rename the file in Google Drive asynchronously and locally
+            if old_title != new_title:
+                if document.drive_file_id:
+                    def rename_file():
+                        rename_drive_file(document.drive_file_id, new_title)
+                    threading.Thread(target=rename_file).start()
+                
+                # Rename locally
+                rename_local_file(document, new_title)
                 
             messages.success(request, 'Document updated successfully!')
             return redirect('documents:document_list')
