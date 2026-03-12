@@ -7,7 +7,28 @@ from .forms import DocumentForm, CategoryForm, DocumentEditForm
 from .drive_services import delete_drive_folder, rename_drive_file
 from .utils import rename_local_file
 
-from django.db.models import Q
+from django.db.models import Q, Count
+
+def dashboard(request):
+    # Fetch recent documents (Top 5)
+    recent_documents = Document.objects.all().order_by('-uploaded_at')[:5]
+    
+    # Fetch categories with document counts
+    all_categories = Category.objects.annotate(doc_count=Count('documents'))
+    
+    # Split into 'Main' (Root) and 'Sub' categories for the UI
+    main_categories = all_categories.filter(parent=None)[:2] # Taking first 2 as 'Main'
+    sub_categories = all_categories.exclude(parent=None)[:4]   # Taking next 4 as 'Sub'
+    
+    # In case there are no sub-categories yet, just show more roots or empty
+    if not sub_categories.exists():
+        sub_categories = all_categories.filter(parent=None)[2:6]
+
+    return render(request, 'documents/dashboard.html', {
+        'recent_documents': recent_documents,
+        'main_categories': main_categories,
+        'sub_categories': sub_categories,
+    })
 
 def document_list(request):
     query = request.GET.get('q', '')
