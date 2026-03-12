@@ -134,3 +134,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 GOOGLE_DRIVE_CREDENTIALS_FILE = os.getenv('GOOGLE_DRIVE_CREDENTIALS_FILE', 'credentials.json')
 GOOGLE_DRIVE_TOKEN_FILE = os.getenv('GOOGLE_DRIVE_TOKEN_FILE', 'token.json')
 GOOGLE_DRIVE_ROOT_FOLDER_ID = os.getenv('GOOGLE_DRIVE_ROOT_FOLDER_ID', '')
+
+# Allow iframe previews from the same domain
+X_FRAME_OPTIONS = 'SAMEORIGIN'

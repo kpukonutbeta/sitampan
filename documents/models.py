@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import FileExtensionValidator
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -19,7 +20,8 @@ class Category(models.Model):
 
 class Document(models.Model):
     title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='documents/')
+    abstract = models.TextField(help_text="A brief summary of the document, searchable.", blank=True)
+    file = models.FileField(upload_to='documents/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='documents')
     drive_file_id = models.CharField(max_length=255, null=True, blank=True, help_text="Google Drive File ID")
     uploaded_at = models.DateTimeField(auto_now_add=True)

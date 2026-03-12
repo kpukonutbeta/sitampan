@@ -3,12 +3,43 @@ from django.contrib import messages
 import threading
 from django.contrib import messages
 from .models import Document, Category
-from .forms import DocumentForm, CategoryForm
-from .drive_services import delete_drive_folder
+from .forms import DocumentForm, CategoryForm, DocumentEditForm
+from .drive_services import delete_drive_folder, rename_drive_file
+
+from django.db.models import Q
 
 def document_list(request):
+    query = request.GET.get('q', '')
+    category_id = request.GET.get('category', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
     documents = Document.objects.all().order_by('-uploaded_at')
-    return render(request, 'documents/document_list.html', {'documents': documents})
+    
+    if query:
+        documents = documents.filter(
+            Q(title__icontains=query) | Q(abstract__icontains=query)
+        )
+        
+    if category_id:
+        documents = documents.filter(category_id=category_id)
+        
+    if date_from:
+        documents = documents.filter(uploaded_at__date__gte=date_from)
+        
+    if date_to:
+        documents = documents.filter(uploaded_at__date__lte=date_to)
+
+    categories = Category.objects.all()
+
+    return render(request, 'documents/document_list.html', {
+        'documents': documents,
+        'categories': categories,
+        'query': query,
+        'category_id': category_id,
+        'date_from': date_from,
+        'date_to': date_to,
+    })
 
 def document_upload(request):
     if request.method == 'POST':
@@ -20,6 +51,35 @@ def document_upload(request):
     else:
         form = DocumentForm()
     return render(request, 'documents/document_upload.html', {'form': form})
+
+def document_edit(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    old_title = document.title
+    
+    if request.method == 'POST':
+        form = DocumentEditForm(request.POST, instance=document)
+        if form.is_valid():
+            updated_document = form.save(commit=False)
+            new_title = updated_document.title
+            
+            # Save the document changes
+            updated_document.save()
+            
+            # If title changed, rename the file in Google Drive asynchronously
+            if old_title != new_title and document.drive_file_id:
+                def rename_file():
+                    rename_drive_file(document.drive_file_id, new_title)
+                threading.Thread(target=rename_file).start()
+                
+            messages.success(request, 'Document updated successfully!')
+            return redirect('documents:document_list')
+    else:
+        form = DocumentEditForm(instance=document)
+        
+    return render(request, 'documents/document_edit.html', {
+        'form': form,
+        'document': document
+    })
 
 def category_list(request):
     categories = Category.objects.all()

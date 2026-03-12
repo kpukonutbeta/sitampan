@@ -154,3 +154,26 @@ def delete_drive_folder(folder_id):
     except Exception as e:
         print(f"Error trashing Drive folder {folder_id}: {e}")
         return False
+
+def rename_drive_file(file_id, new_name):
+    """
+    Renames a file in Google Drive.
+    """
+    if not file_id or not new_name:
+        return False
+        
+    service = get_drive_service()
+    if not service:
+        return False
+        
+    try:
+        file_metadata = {'name': new_name}
+        service.files().update(
+            fileId=file_id,
+            body=file_metadata,
+            supportsAllDrives=True
+        ).execute()
+        return True
+    except Exception as e:
+        print(f"Error renaming Drive file {file_id}: {e}")
+        return False
