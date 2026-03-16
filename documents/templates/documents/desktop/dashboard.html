@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SITAMPAN - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style type="text/tailwindcss">
+        :root {
+            --primary: #2563eb;
+            --primary-soft: #eff6ff;
+            --background-light: #F9FAFB;
+            --card-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--background-light);
+        }
+        .ios-shadow {
+            box-shadow: var(--card-shadow);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#0f172a",
+                    },
+                    borderRadius: {
+                        'ios': '20px',
+                    }
+                },
+            },
+        };
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+
+<main class="px-5 pb-32 pt-12 max-w-lg mx-auto">
+    <header class="flex justify-between items-center mb-6">
+        <div>
+            <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">Welcome back,</p>
+            {% if request.user.is_authenticated %}
+                <h1 class="text-2xl font-bold tracking-tight">{{ request.user.first_name|default:request.user.username }}</h1>
+            {% else %}
+                <h1 class="text-2xl font-bold tracking-tight">SITAMPAN User</h1>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-3">
+            {% if request.user.is_staff %}
+            <a href="{% url 'desktop:dashboard' %}" class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                <span class="hidden sm:inline">Desktop</span>
+            </a>
+            {% endif %}
+            <div class="relative">
+                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center bg-primary text-white">
+                    <span class="material-symbols-outlined">person</span>
+                </div>
+                {% if request.user.is_authenticated %}
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Form -->
+    {% if request.user.is_staff %}
+    <div class="relative mb-8">
+        <form method="GET" action="{% url 'documents:dashboard' %}">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                <span class="material-symbols-outlined text-xl">search</span>
+            </span>
+            <input name="q" class="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-800 border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm" placeholder="Search archives..." type="text"/>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Main Categories -->
+    <section class="mb-8">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Categories</h2>
+        <div class="grid grid-cols-2 gap-4">
+            {% for cat in main_categories %}
+            <a {% if request.user.is_staff %}href="{% url 'documents:dashboard' %}?category={{ cat.id }}"{% endif %} class="{% if forloop.first %}bg-primary dark:bg-blue-600 text-white{% else %}bg-white dark:bg-slate-800 text-slate-900 dark:text-white ios-shadow border border-slate-100 dark:border-slate-700/50{% endif %} p-5 rounded-ios relative overflow-hidden group block">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform"></div>
+                <div class="relative z-10">
+                    <div class="w-10 h-10 {% if forloop.first %}bg-white/20{% else %}bg-blue-50 dark:bg-blue-900/30{% endif %} rounded-xl flex items-center justify-center mb-3">
+                        <span class="material-symbols-outlined {% if forloop.first %}text-white{% else %}text-primary{% endif %}">{% if forloop.first %}move_to_inbox{% else %}outbox{% endif %}</span>
+                    </div>
+                    {% if cat.parent %}
+                        <p class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">{{ cat.parent.name }}</p>
+                    {% else %}
+                        <p class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">Root Category</p>
+                    {% endif %}
+                    <h3 class="text-lg font-bold">{{ cat.name }}</h3>
+                    <p class="text-[10px] {% if forloop.first %}text-white/70{% else %}text-slate-400{% endif %} mt-1">{{ cat.doc_count }} Documents</p>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-2 text-center py-8 bg-white dark:bg-slate-800 rounded-ios text-slate-400 text-sm">
+                No categories found.
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Sub Categories -->
+    <section class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sub-Kategori</h2>
+            <a href="{% url 'documents:category_list' %}" class="text-primary text-xs font-bold">View All</a>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            {% for cat in sub_categories %}
+            <a {% if request.user.is_staff %}href="{% url 'documents:dashboard' %}?category={{ cat.id }}"{% endif %} class="bg-white dark:bg-slate-800 p-4 rounded-ios ios-shadow border border-slate-50 dark:border-slate-700/30 flex flex-col items-start block transition-transform active:scale-95">
+                <div class="w-10 h-10 {% cycle 'bg-sky-50 dark:bg-sky-900/20' 'bg-indigo-50 dark:bg-indigo-900/20' 'bg-blue-50 dark:bg-blue-900/20' 'bg-slate-100 dark:bg-slate-700/50' %} rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined {% cycle 'text-sky-600' 'text-indigo-600' 'text-blue-600' 'text-slate-600 dark:text-slate-300' %} text-xl filled">
+                        {% cycle 'description' 'assignment' 'gavel' 'fact_check' %}
+                    </span>
+                </div>
+                <h4 class="font-bold text-slate-800 dark:text-white text-sm mb-1">{{ cat.name }}</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{{ cat.doc_count }} Dokumen</p>
+            </a>
+            {% empty %}
+            <div class="col-span-2 text-center py-8 text-slate-400 text-xs">
+                Create sub-categories to see them here.
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Recent Activity -->
+    <section>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h2>
+            {% if request.user.is_staff %}
+            <a href="{% url 'documents:dashboard' %}" class="material-symbols-outlined text-slate-400">more_horiz</a>
+            {% endif %}
+        </div>
+        <div class="space-y-3">
+            {% for doc in recent_documents %}
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl flex items-center gap-4 ios-shadow border border-slate-50 dark:border-slate-700/30">
+                <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-blue-600 text-lg">article</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-semibold text-sm truncate">{{ doc.title }}</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">{{ doc.category.name }} • {{ doc.uploaded_at|timesince }} ago</p>
+                </div>
+                {% if request.user.is_staff %}
+                <a href="{% url 'documents:dashboard' %}?q={{ doc.title }}" class="text-slate-300">
+                    <span class="material-symbols-outlined text-xl">chevron_right</span>
+                </a>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700">
+                No recent uploads.
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-8 py-3 flex justify-between items-center pb-8 z-40 max-w-lg mx-auto">
+    <a href="{% url 'documents:dashboard' %}" class="flex flex-col items-center text-primary">
+        <span class="material-symbols-outlined filled">grid_view</span>
+        <span class="text-[10px] font-bold mt-1">Home</span>
+    </a>
+    {% if request.user.is_staff %}
+    <a href="{% url 'documents:dashboard' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+        <span class="material-symbols-outlined">folder</span>
+        <span class="text-[10px] font-medium mt-1">Archives</span>
+    </a>
+    <div class="relative -top-6">
+        <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40">
+            <span class="material-symbols-outlined text-2xl font-bold">add</span>
+        </a>
+    </div>
+    {% endif %}
+    <a href="{% url 'documents:category_list' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+        <span class="material-symbols-outlined">category</span>
+        <span class="text-[10px] font-medium mt-1">Categories</span>
+    </a>
+    {% if user.is_authenticated %}
+    <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="text-[10px] font-medium mt-1">Logout</span>
+    </a>
+    {% else %}
+    <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+        <span class="material-symbols-outlined">login</span>
+        <span class="text-[10px] font-medium mt-1">Login</span>
+    </a>
+    {% endif %}
+</nav>
+
+</body>
+</html>

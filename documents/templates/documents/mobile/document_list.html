@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SITAMPAN - Search Results</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#360f00",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "primary-fixed": "#dce1ff",
+                        "on-secondary-fixed-variant": "#32447c",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c3c5d7",
+                        "tertiary": "#953800",
+                        "outline": "#737686",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-surface-variant": "#434655",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#f0f1ff",
+                        "surface-dim": "#d9dadb",
+                        "surface-container": "#edeeef",
+                        "primary-fixed-dim": "#b5c4ff",
+                        "on-surface": "#191c1d",
+                        "surface-container-low": "#f3f4f5",
+                        "on-primary-fixed-variant": "#003cad",
+                        "on-secondary-fixed": "#00164d",
+                        "surface-tint": "#0e52dc",
+                        "surface-variant": "#e1e3e4",
+                        "background": "#f8f9fa",
+                        "primary-container": "#2d63ed",
+                        "secondary-fixed": "#dce1ff",
+                        "surface-bright": "#f8f9fa",
+                        "primary": "#0049ce",
+                        "on-secondary-container": "#3a4c85",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#b5c4ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "inverse-primary": "#b5c4ff",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#191c1d",
+                        "tertiary-container": "#bd4900",
+                        "secondary": "#4a5c95",
+                        "on-primary-fixed": "#00164d",
+                        "surface": "#f8f9fa",
+                        "secondary-container": "#adbfff",
+                        "on-tertiary-container": "#ffefe9",
+                        "error": "#ba1a1a"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #191c1d; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <script>
+        function openPreview(url, title, fileName, driveUrl, folderUrl) {
+            const modal = document.getElementById('previewModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const content = document.getElementById('modalContent');
+            const container = document.getElementById('previewContainer');
+            const titleEl = document.getElementById('previewTitle');
+            const spinner = document.getElementById('loadingSpinner');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const driveBtn = document.getElementById('driveBtn');
+            const folderBtn = document.getElementById('folderBtn');
+
+            titleEl.textContent = title;
+            downloadBtn.href = url;
+            
+            if (driveUrl) {
+                driveBtn.href = driveUrl;
+                driveBtn.classList.remove('hidden');
+            } else {
+                driveBtn.classList.add('hidden');
+            }
+
+            if (folderUrl) {
+                folderBtn.href = folderUrl;
+                folderBtn.classList.remove('hidden');
+            } else {
+                folderBtn.classList.add('hidden');
+            }
+
+            container.innerHTML = '';
+            spinner.style.display = 'flex';
+
+            modal.classList.remove('hidden');
+            
+            // Trigger animations
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                content.classList.remove('translate-y-full');
+                content.classList.add('translate-y-0');
+            }, 10);
+
+            const fileExt = fileName.split('.').pop().toLowerCase();
+            
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
+                const img = new Image();
+                img.onload = () => spinner.style.display = 'none';
+                img.src = url;
+                img.className = 'max-w-full max-h-full object-contain rounded-lg shadow-sm';
+                container.appendChild(img);
+            } else if (fileExt === 'pdf') {
+                const iframe = document.createElement('iframe');
+                iframe.src = url + '#toolbar=0';
+                iframe.className = 'w-full h-full border-none rounded-lg';
+                iframe.onload = () => spinner.style.display = 'none';
+                container.appendChild(iframe);
+            } else {
+                spinner.style.display = 'none';
+                container.innerHTML = `
+                    <div class="text-center p-8">
+                        <span class="material-symbols-outlined text-6xl text-outline mb-4">file_present</span>
+                        <p class="text-on-surface-variant mb-6">Preview not available for this file type.</p>
+                        <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold">
+                            <span class="material-symbols-outlined">open_in_new</span>
+                            Open in Browser
+                        </a>
+                    </div>
+                `;
+            }
+
+            // Prevent scroll on body
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview() {
+            const backdrop = document.getElementById('modalBackdrop');
+            const content = document.getElementById('modalContent');
+            const modal = document.getElementById('previewModal');
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('translate-y-0');
+            content.classList.add('translate-y-full');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 500);
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen flex flex-col">
+    <!-- TopAppBar -->
+    <header class="sticky top-0 z-50 bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-outline-variant/10">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'documents:dashboard' %}" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <h1 class="font-headline font-bold text-lg text-on-surface">Archive Ether</h1>
+        </div>
+        <button class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
+            <span class="material-symbols-outlined">more_vert</span>
+        </button>
+    </header>
+
+    <main class="flex-1 px-4 max-w-4xl mx-auto w-full pb-32">
+        <!-- SearchBar -->
+        <div class="mt-4 mb-6">
+            <form method="GET" action="{% url 'documents:document_list' %}">
+                <div class="relative flex items-center bg-surface-container-low hover:bg-surface-container rounded-2xl transition-all duration-300 px-4 py-3 group shadow-sm">
+                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-outline px-3" placeholder="Search archives..." type="text" value="{{ query }}"/>
+                    {% if query %}
+                    <a href="{% url 'documents:document_list' %}" class="p-1 hover:bg-surface-container-high rounded-full transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Chips / Filters -->
+        <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
+            <button class="flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full text-sm font-medium whitespace-nowrap">
+                Date
+                <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+            </button>
+            <div class="relative group">
+                <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">
+                    Category
+                    <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                </button>
+            </div>
+            <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">
+                File Type
+                <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+            </button>
+        </div>
+
+        <!-- Section Label -->
+        <div class="flex items-baseline justify-between mb-4 px-2">
+            <h2 class="font-headline text-on-surface-variant text-sm font-semibold tracking-wider uppercase">Results ({{ documents.count }})</h2>
+            <div class="text-xs text-outline font-medium">Sorted by Upload Date</div>
+        </div>
+
+        <!-- Search Results List -->
+        <div class="space-y-3">
+            {% for doc in documents %}
+            <div class="bg-surface-container-lowest p-4 rounded-3xl flex items-center gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_8px_24px_rgba(25,28,29,0.04)] group cursor-pointer" onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
+                <div class="w-14 h-14 rounded-2xl bg-primary-container/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <span class="material-symbols-outlined text-3xl">{% if doc.file.name|lower|slice:"-3:" == "pdf" %}description{% else %}article{% endif %}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start">
+                        <h3 class="font-headline text-on-surface font-bold text-base truncate pr-2">{{ doc.title }}</h3>
+                        <span class="text-[11px] font-bold text-primary px-2 py-1 bg-primary/5 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span class="text-on-surface-variant text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                            {{ doc.uploaded_at|date:"M d, Y" }}
+                        </span>
+                        <span class="text-outline text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">history</span>
+                            {% if doc.drive_file_id %}Synced{% else %}Local{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12 px-4">
+                <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
+                    <span class="material-symbols-outlined text-4xl">search_off</span>
+                </div>
+                <h3 class="font-headline font-bold text-on-surface">No documents found</h3>
+                <p class="text-on-surface-variant text-sm mt-2">Try adjusting your keywords or filters.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Document Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300 opacity-0" id="modalBackdrop"></div>
+        
+        <!-- Modal Content -->
+        <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-background-dark rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full" id="modalContent">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
+                <div class="flex-1 min-w-0 mr-4">
+                    <h3 id="previewTitle" class="font-headline font-bold text-on-surface truncate">Document Preview</h3>
+                    <p id="previewSubtitle" class="text-xs text-on-surface-variant">Tap to view full screen</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="folderBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-amber-600 hidden" title="Open Folder Location">
+                        <span class="material-symbols-outlined">folder_open</span>
+                    </a>
+                    <a id="driveBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-emerald-600 hidden" title="Open in Google Drive">
+                        <span class="material-symbols-outlined">add_to_drive</span>
+                    </a>
+                    <a id="downloadBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-primary">
+                        <span class="material-symbols-outlined">download</span>
+                    </a>
+                    <button onclick="closePreview()" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Preview Body -->
+            <div class="flex-1 overflow-hidden relative bg-surface-container-lowest">
+                <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center z-10">
+                    <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                </div>
+                
+                <div id="previewContainer" class="w-full h-full flex items-center justify-center p-4">
+                    <!-- Preview content will be injected here -->
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-6 pb-12 bg-surface-container-lowest border-t border-outline-variant/10">
+                <button onclick="closePreview()" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                    Close Preview
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest/80 backdrop-blur-2xl border-t border-outline-variant/10 px-6 py-3 flex justify-between items-center z-50 max-w-lg mx-auto pb-8">
+        <a href="{% url 'documents:dashboard' %}" class="flex flex-col items-center gap-1 group">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">home</span>
+            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Home</span>
+        </a>
+        <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center gap-1 relative">
+            <div class="absolute -top-1 w-8 h-1 bg-primary rounded-full"></div>
+            <span class="material-symbols-outlined text-primary filled">search</span>
+            <span class="text-[10px] font-bold text-primary">Search</span>
+        </a>
+        <a href="{% url 'documents:document_upload' %}" class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-3xl -mt-10 shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+            <span class="material-symbols-outlined text-3xl">cloud_upload</span>
+        </a>
+        <a href="{% url 'documents:category_list' %}" class="flex flex-col items-center gap-1 group">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">category</span>
+            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Categories</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'account_logout' %}" class="flex flex-col items-center gap-1 group">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">logout</span>
+            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Logout</span>
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" class="flex flex-col items-center gap-1 group">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">login</span>
+            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Login</span>
+        </a>
+        {% endif %}
+    </nav>
+</body>
+</html>

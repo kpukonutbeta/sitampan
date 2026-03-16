@@ -13,7 +13,7 @@
 <!-- Search Form -->
 <div class="card mb-4 shadow-sm">
     <div class="card-body">
-        <form method="GET" action="{% url 'documents:document_list' %}" class="row g-3 align-items-end">
+        <form method="GET" action="{% url 'documents:dashboard' %}" class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label for="q" class="form-label text-muted small mb-1">Keyword</label>
                 <input type="text" name="q" id="q" class="form-control" placeholder="Search by title or abstract..." value="{{ query }}">
@@ -47,7 +47,7 @@
             
             {% if query or category_id or date_from or date_to %}
             <div class="col-12 mt-2">
-                <a href="{% url 'documents:document_list' %}" class="btn btn-sm btn-link text-decoration-none px-0">Clear Filters</a>
+                <a href="{% url 'documents:dashboard' %}" class="btn btn-sm btn-link text-decoration-none px-0">Clear Filters</a>
             </div>
             {% endif %}
         </form>
