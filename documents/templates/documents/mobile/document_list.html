@@ -13,60 +13,28 @@
             theme: {
                 extend: {
                     colors: {
-                        "on-tertiary-fixed": "#360f00",
-                        "on-error": "#ffffff",
-                        "inverse-surface": "#2e3132",
-                        "primary-fixed": "#dce1ff",
-                        "on-secondary-fixed-variant": "#32447c",
-                        "tertiary-fixed": "#ffdbcd",
-                        "surface-container-high": "#e7e8e9",
-                        "inverse-on-surface": "#f0f1f2",
-                        "surface-container-highest": "#e1e3e4",
+                        primary: "#2563eb",
+                        "primary-container": "#eff6ff",
+                        "on-primary-container": "#1e40af",
+                        background: "#F9FAFB",
+                        surface: "#ffffff",
+                        "on-surface": "#0f172a",
+                        "on-surface-variant": "#64748b",
+                        outline: "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
                         "surface-container-lowest": "#ffffff",
-                        "outline-variant": "#c3c5d7",
-                        "tertiary": "#953800",
-                        "outline": "#737686",
-                        "on-tertiary-fixed-variant": "#7d2d00",
-                        "on-surface-variant": "#434655",
-                        "error-container": "#ffdad6",
-                        "on-primary-container": "#f0f1ff",
-                        "surface-dim": "#d9dadb",
-                        "surface-container": "#edeeef",
-                        "primary-fixed-dim": "#b5c4ff",
-                        "on-surface": "#191c1d",
-                        "surface-container-low": "#f3f4f5",
-                        "on-primary-fixed-variant": "#003cad",
-                        "on-secondary-fixed": "#00164d",
-                        "surface-tint": "#0e52dc",
-                        "surface-variant": "#e1e3e4",
-                        "background": "#f8f9fa",
-                        "primary-container": "#2d63ed",
-                        "secondary-fixed": "#dce1ff",
-                        "surface-bright": "#f8f9fa",
-                        "primary": "#0049ce",
-                        "on-secondary-container": "#3a4c85",
-                        "on-secondary": "#ffffff",
-                        "on-error-container": "#93000a",
-                        "secondary-fixed-dim": "#b5c4ff",
-                        "on-primary": "#ffffff",
-                        "tertiary-fixed-dim": "#ffb596",
-                        "inverse-primary": "#b5c4ff",
-                        "on-tertiary": "#ffffff",
-                        "on-background": "#191c1d",
-                        "tertiary-container": "#bd4900",
-                        "secondary": "#4a5c95",
-                        "on-primary-fixed": "#00164d",
-                        "surface": "#f8f9fa",
-                        "secondary-container": "#adbfff",
-                        "on-tertiary-container": "#ffefe9",
-                        "error": "#ba1a1a"
+                        "surface-container-low": "#f8fafc",
+                        "surface-container": "#f1f5f9",
+                        "surface-container-high": "#e2e8f0",
+                        "surface-container-highest": "#cbd5e1",
                     },
                     fontFamily: {
-                        "headline": ["Manrope"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
+                        sans: ["Inter", "sans-serif"],
                     },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                    borderRadius: {
+                        'ios': '20px',
+                        '3xl': '24px',
+                    },
                 },
             },
         }
@@ -169,29 +137,24 @@
         }
     </script>
 </head>
-<body class="bg-background min-h-screen flex flex-col">
+<body class="bg-background dark:bg-slate-900 min-h-screen flex flex-col font-sans">
     <!-- TopAppBar -->
-    <header class="sticky top-0 z-50 bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-outline-variant/10">
-        <div class="flex items-center gap-4">
-            <a href="{% url 'documents:dashboard' %}" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
-                <span class="material-symbols-outlined">arrow_back</span>
-            </a>
-            <h1 class="font-headline font-bold text-lg text-on-surface">Archive Ether</h1>
-        </div>
-        <button class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
-            <span class="material-symbols-outlined">more_vert</span>
-        </button>
+    <header class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-4 py-4 flex items-center border-b border-primary/10">
+        <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+            <span class="material-symbols-outlined text-on-surface">arrow_back</span>
+        </a>
+        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight text-on-surface">Archive Ether</h1>
     </header>
 
     <main class="flex-1 px-4 max-w-4xl mx-auto w-full pb-32">
         <!-- SearchBar -->
         <div class="mt-4 mb-6">
             <form method="GET" action="{% url 'documents:document_list' %}">
-                <div class="relative flex items-center bg-surface-container-low hover:bg-surface-container rounded-2xl transition-all duration-300 px-4 py-3 group shadow-sm">
+                <div class="relative flex items-center bg-slate-200/50 dark:bg-white/5 rounded-ios transition-all duration-300 px-4 py-3 group">
                     <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
-                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-outline px-3" placeholder="Search archives..." type="text" value="{{ query }}"/>
+                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3" placeholder="Search archives..." type="text" value="{{ query }}"/>
                     {% if query %}
-                    <a href="{% url 'documents:document_list' %}" class="p-1 hover:bg-surface-container-high rounded-full transition-colors">
+                    <a href="{% url 'documents:document_list' %}" class="p-1 hover:bg-primary/10 rounded-full transition-colors">
                         <span class="material-symbols-outlined text-on-surface-variant">close</span>
                     </a>
                     {% endif %}
@@ -201,47 +164,47 @@
 
         <!-- Chips / Filters -->
         <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
-            <button class="flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-full text-sm font-medium whitespace-nowrap">
+            <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
                 Date
-                <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
             <div class="relative group">
-                <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">
+                <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
                     Category
-                    <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                    <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
                 </button>
             </div>
-            <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">
+            <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
                 File Type
-                <span class="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
         </div>
 
         <!-- Section Label -->
-        <div class="flex items-baseline justify-between mb-4 px-2">
-            <h2 class="font-headline text-on-surface-variant text-sm font-semibold tracking-wider uppercase">Results ({{ documents.count }})</h2>
-            <div class="text-xs text-outline font-medium">Sorted by Upload Date</div>
+        <div class="flex items-baseline justify-between mb-4 px-1">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Results ({{ documents.count }})</h2>
+            <div class="text-[10px] text-slate-400 font-bold">Sorted by Upload Date</div>
         </div>
 
         <!-- Search Results List -->
         <div class="space-y-3">
             {% for doc in documents %}
-            <div class="bg-surface-container-lowest p-4 rounded-3xl flex items-center gap-4 transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_8px_24px_rgba(25,28,29,0.04)] group cursor-pointer" onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
-                <div class="w-14 h-14 rounded-2xl bg-primary-container/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                    <span class="material-symbols-outlined text-3xl">{% if doc.file.name|lower|slice:"-3:" == "pdf" %}description{% else %}article{% endif %}</span>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-ios flex items-center gap-4 transition-all duration-300 ios-shadow border border-slate-50 dark:border-slate-700/30 group cursor-pointer active:scale-[0.98]" onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <span class="material-symbols-outlined text-2xl">{% if doc.file.name|lower|slice:"-3:" == "pdf" %}description{% else %}article{% endif %}</span>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
-                        <h3 class="font-headline text-on-surface font-bold text-base truncate pr-2">{{ doc.title }}</h3>
-                        <span class="text-[11px] font-bold text-primary px-2 py-1 bg-primary/5 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</span>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{{ doc.title }}</h3>
+                        <span class="text-[9px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</span>
                     </div>
                     <div class="flex items-center gap-3 mt-1">
-                        <span class="text-on-surface-variant text-xs flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                        <span class="text-slate-400 text-[10px] flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">calendar_today</span>
                             {{ doc.uploaded_at|date:"M d, Y" }}
                         </span>
-                        <span class="text-outline text-xs flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[14px]">history</span>
+                        <span class="text-slate-400 text-[10px] flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">history</span>
                             {% if doc.drive_file_id %}Synced{% else %}Local{% endif %}
                         </span>
                     </div>
@@ -309,32 +272,35 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest/80 backdrop-blur-2xl border-t border-outline-variant/10 px-6 py-3 flex justify-between items-center z-50 max-w-lg mx-auto pb-8">
-        <a href="{% url 'documents:dashboard' %}" class="flex flex-col items-center gap-1 group">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">home</span>
-            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Home</span>
+    <nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
+        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:dashboard' %}">
+            <span class="material-symbols-outlined">grid_view</span>
+            <p class="text-[10px] font-medium mt-1">Home</p>
         </a>
-        <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center gap-1 relative">
-            <div class="absolute -top-1 w-8 h-1 bg-primary rounded-full"></div>
-            <span class="material-symbols-outlined text-primary filled">search</span>
-            <span class="text-[10px] font-bold text-primary">Search</span>
+        {% if request.user.is_staff %}
+        <a class="flex flex-col items-center text-primary" href="{% url 'documents:document_list' %}">
+            <span class="material-symbols-outlined filled">folder</span>
+            <p class="text-[10px] font-bold mt-1">Archives</p>
         </a>
-        <a href="{% url 'documents:document_upload' %}" class="flex items-center justify-center w-14 h-14 bg-primary text-white rounded-3xl -mt-10 shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
-            <span class="material-symbols-outlined text-3xl">cloud_upload</span>
-        </a>
-        <a href="{% url 'documents:category_list' %}" class="flex flex-col items-center gap-1 group">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">category</span>
-            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Categories</span>
+        <div class="relative -top-6">
+            <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl font-bold">add</span>
+            </a>
+        </div>
+        {% endif %}
+        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:category_list' %}">
+            <span class="material-symbols-outlined">category</span>
+            <p class="text-[10px] font-medium mt-1">Categories</p>
         </a>
         {% if user.is_authenticated %}
-        <a href="{% url 'account_logout' %}" class="flex flex-col items-center gap-1 group">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">logout</span>
-            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Logout</span>
+        <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-[10px] font-medium mt-1">Logout</span>
         </a>
         {% else %}
-        <a href="{% url 'account_login' %}" class="flex flex-col items-center gap-1 group">
-            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">login</span>
-            <span class="text-[10px] font-bold text-on-surface-variant group-hover:text-primary">Login</span>
+        <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">login</span>
+            <span class="text-[10px] font-medium mt-1">Login</span>
         </a>
         {% endif %}
     </nav>
