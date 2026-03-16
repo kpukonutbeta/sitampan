@@ -190,7 +190,7 @@
         <span class="text-[10px] font-bold mt-1">Home</span>
     </a>
     {% if request.user.is_staff %}
-    <a href="{% url 'documents:dashboard' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+    <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
         <span class="material-symbols-outlined">folder</span>
         <span class="text-[10px] font-medium mt-1">Archives</span>
     </a>
