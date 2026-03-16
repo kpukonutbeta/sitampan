@@ -8,8 +8,24 @@ from .drive_services import delete_drive_folder, rename_drive_file
 from .utils import rename_local_file
 
 from django.db.models import Q, Count
+from django.contrib.admin.views.decorators import staff_member_required
+
+def resolve_template(request, template_name):
+    # This determines if the user is in /m/... or /d/... based on current namespace
+    mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    # Default to mobile if for some reason namespace isn't set, although it should be
+    if mode not in ['mobile', 'desktop']:
+        mode = 'mobile'
+    return f"documents/{mode}/{template_name}"
 
 def dashboard(request):
+    # This determines if the user is in /m/... or /d/... based on current namespace
+    mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    
+    # If desktop, use document_list view logic instead of the dashboard
+    if mode == 'desktop':
+        return document_list(request)
+
     # Fetch recent documents (Top 5)
     recent_documents = Document.objects.all().order_by('-uploaded_at')[:5]
     
@@ -24,13 +40,20 @@ def dashboard(request):
     if not sub_categories.exists():
         sub_categories = all_categories.filter(parent=None)[2:6]
 
-    return render(request, 'documents/dashboard.html', {
+    return render(request, resolve_template(request, 'dashboard.html'), {
         'recent_documents': recent_documents,
         'main_categories': main_categories,
         'sub_categories': sub_categories,
     })
 
+@staff_member_required
 def document_list(request):
+    # If in desktop mode and accessed via the document_list URL, redirect to dashboard root (since /d/ already shows archives)
+    mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    url_name = getattr(request.resolver_match, 'url_name', '')
+    if mode == 'desktop' and url_name == 'document_list':
+        return redirect('desktop:dashboard')
+
     query = request.GET.get('q', '')
     category_id = request.GET.get('category', '')
     date_from = request.GET.get('date_from', '')
@@ -54,7 +77,7 @@ def document_list(request):
 
     categories = Category.objects.all()
 
-    return render(request, 'documents/document_list.html', {
+    return render(request, resolve_template(request, 'document_list.html'), {
         'documents': documents,
         'categories': categories,
         'query': query,
@@ -63,16 +86,17 @@ def document_list(request):
         'date_to': date_to,
     })
 
+@staff_member_required
 def document_upload(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Document uploaded successfully! It will be synced to Google Drive in the background.')
-            return redirect('documents:document_list')
+            return redirect('documents:dashboard')
     else:
         form = DocumentForm()
-    return render(request, 'documents/document_upload.html', {'form': form})
+    return render(request, resolve_template(request, 'document_upload.html'), {'form': form})
 
 def document_edit(request, pk):
     document = get_object_or_404(Document, pk=pk)
@@ -98,18 +122,32 @@ def document_edit(request, pk):
                 rename_local_file(document, new_title)
                 
             messages.success(request, 'Document updated successfully!')
-            return redirect('documents:document_list')
+            return redirect('documents:dashboard')
     else:
         form = DocumentEditForm(instance=document)
         
-    return render(request, 'documents/document_edit.html', {
+    return render(request, resolve_template(request, 'document_edit.html'), {
         'form': form,
         'document': document
     })
 
 def category_list(request):
-    categories = Category.objects.all()
-    return render(request, 'documents/category_list.html', {'categories': categories})
+    # Fetch all root categories
+    root_categories = Category.objects.filter(parent=None)
+    
+    sections = []
+    for root in root_categories:
+        # Fetch children for each root and annotate with document counts
+        children = Category.objects.filter(parent=root).annotate(doc_count=Count('documents'))
+        sections.append({
+            'root': root,
+            'children': children,
+            'child_count': children.count()
+        })
+        
+    return render(request, resolve_template(request, 'category_grid.html'), {
+        'sections': sections,
+    })
 
 def category_add(request):
     if request.method == 'POST':
@@ -120,7 +158,7 @@ def category_add(request):
             return redirect('documents:category_list')
     else:
         form = CategoryForm()
-    return render(request, 'documents/category_add.html', {'form': form})
+    return render(request, resolve_template(request, 'category_add.html'), {'form': form})
 
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
@@ -175,4 +213,4 @@ def category_delete(request, pk):
         'affected_documents_count': affected_documents.count(),
         'available_categories': available_categories,
     }
-    return render(request, 'documents/category_delete.html', context)
+    return render(request, resolve_template(request, 'category_delete.html'), context)
