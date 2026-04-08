@@ -62,34 +62,29 @@
     </div>
 
     <main class="flex-1 pb-32">
-        {% for section in sections %}
-        <section class="mt-4 category-section">
-            <div class="flex items-center justify-between px-4 pb-4">
-                <h2 class="text-lg font-bold">{{ section.root.name }}</h2>
-                <span class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">{{ section.child_count }} Categories</span>
-            </div>
-            <div class="grid grid-cols-4 gap-2 px-4">
-                {% for child in section.children %}
-                <a {% if request.user.is_staff %}href="{% url 'documents:dashboard' %}?category={{ child.id }}"{% endif %} class="category-item flex flex-col items-center gap-2 rounded-xl border border-primary/10 bg-white dark:bg-slate-800 p-2 hover:border-primary/30 transition-all cursor-pointer text-center group">
-                    <div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                        <span class="material-symbols-outlined text-xl">
-                            {% cycle 'description' 'assignment' 'drafts' 'mail' 'badge' 'article' 'gavel' 'handshake' 'card_membership' 'folder' %}
-                        </span>
+        <div class="px-4 space-y-3 mt-4">
+            {% for cat in categories %}
+            <a href="{% url 'documents:document_list' %}?category={{ cat.id }}" class="category-item flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm active:scale-[0.98] transition-all group">
+                <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-2xl">folder</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ cat.name }}</h3>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mb-1">{{ cat }}</p>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">{{ cat.doc_count }} Doc</span>
+                        <span class="text-[9px] text-slate-400 font-medium">Depth: {{ cat.get_depth }}</span>
                     </div>
-                    <div class="flex flex-col min-w-0 w-full">
-                        <h3 class="text-[9px] font-bold truncate">{{ child.name }}</h3>
-                        <p class="text-[8px] text-slate-500 dark:text-slate-400 truncate">{{ child.doc_count }} Doc</p>
-                    </div>
-                </a>
-                {% endfor %}
+                </div>
+                <span class="material-symbols-outlined text-slate-300">chevron_right</span>
+            </a>
+            {% empty %}
+            <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+                <span class="material-symbols-outlined text-6xl mb-4">folder_off</span>
+                <p>No categories found.</p>
             </div>
-        </section>
-        {% empty %}
-        <div class="flex flex-col items-center justify-center py-20 text-slate-400">
-            <span class="material-symbols-outlined text-6xl mb-4">folder_off</span>
-            <p>No categories found.</p>
+            {% endfor %}
         </div>
-        {% endfor %}
     </main>
 
     <!-- Bottom Navigation -->
@@ -98,11 +93,11 @@
             <span class="material-symbols-outlined">grid_view</span>
             <p class="text-[10px] font-medium mt-1">Home</p>
         </a>
-        {% if request.user.is_staff %}
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:document_list' %}">
             <span class="material-symbols-outlined">folder</span>
             <p class="text-[10px] font-medium mt-1">Archives</p>
         </a>
+        {% if request.user.is_staff %}
         <div class="relative -top-6">
             <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
                 <span class="material-symbols-outlined text-2xl font-bold">add</span>

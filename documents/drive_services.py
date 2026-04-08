@@ -5,6 +5,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from django.conf import settings
+from google.auth import exceptions
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
@@ -19,8 +20,13 @@ def get_drive_service():
         
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except exceptions.RefreshError:
+                # If refresh fails, clear creds to force a new login flow
+                creds = None
+        
+        if not creds or not creds.valid:
             if not os.path.exists(creds_path):
                 print(f"Credentials file not found at {creds_path}. Please download it from Google Cloud Console.")
                 return None

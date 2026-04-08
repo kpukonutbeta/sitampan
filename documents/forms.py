@@ -11,6 +11,22 @@ class CategoryForm(forms.ModelForm):
             'allow_document_upload': forms.CheckboxInput(attrs={'class': 'form-check-input'})
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        parent = cleaned_data.get('parent')
+        name = cleaned_data.get('name')
+
+        if parent:
+            # Check maximum depth
+            if parent.get_depth() >= 5:
+                raise forms.ValidationError("Maximum category depth is 5 levels. Cannot create more subcategories here.")
+            
+            # Check for self-reference
+            if self.instance and parent == self.instance:
+                raise forms.ValidationError("A category cannot be its own parent.")
+
+        return cleaned_data
+
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
