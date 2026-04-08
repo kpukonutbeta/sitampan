@@ -46,7 +46,6 @@ def dashboard(request):
         'sub_categories': sub_categories,
     })
 
-@staff_member_required
 def document_list(request):
     # If in desktop mode and accessed via the document_list URL, redirect to dashboard root (since /d/ already shows archives)
     mode = getattr(request.resolver_match, 'namespace', 'mobile')
@@ -132,21 +131,14 @@ def document_edit(request, pk):
     })
 
 def category_list(request):
-    # Fetch all root categories
-    root_categories = Category.objects.filter(parent=None)
+    # Fetch all categories and annotate with document counts
+    all_categories = Category.objects.annotate(doc_count=Count('documents')).order_by('name')
     
-    sections = []
-    for root in root_categories:
-        # Fetch children for each root and annotate with document counts
-        children = Category.objects.filter(parent=root).annotate(doc_count=Count('documents'))
-        sections.append({
-            'root': root,
-            'children': children,
-            'child_count': children.count()
-        })
-        
+    # Sort categories to group by path (calculated locally since __str__ is dynamic)
+    sorted_categories = sorted(all_categories, key=lambda x: str(x))
+    
     return render(request, resolve_template(request, 'category_grid.html'), {
-        'sections': sections,
+        'categories': sorted_categories,
     })
 
 def category_add(request):
@@ -214,3 +206,23 @@ def category_delete(request, pk):
         'available_categories': available_categories,
     }
     return render(request, resolve_template(request, 'category_delete.html'), context)
+
+@staff_member_required
+def document_delete(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    drive_file_id = document.drive_file_id
+    
+    if request.method == 'POST':
+        # Delete the document object from database
+        document.delete()
+        
+        # Trash the file in Google Drive asynchronously
+        if drive_file_id:
+            def trash_file():
+                delete_drive_folder(drive_file_id) # delete_drive_folder uses 'trashed': True which works for files too
+            threading.Thread(target=trash_file).start()
+            
+        messages.success(request, 'Document deleted successfully and moved to trash in Google Drive.')
+        return redirect('documents:document_list')
+        
+    return render(request, resolve_template(request, 'document_delete.html'), {'document': document})

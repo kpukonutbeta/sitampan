@@ -31,6 +31,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://21et5chv2uin.shares.zrok.io',
+]
+
+# Support for reverse proxies (like zrok)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 # Application definition
 
@@ -168,6 +176,9 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+# Allow SSO login for existing users by email
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 
 # Restrict Google Logins based on email
 SOCIALACCOUNT_ADAPTER = 'documents.adapters.RestrictEmailAdapter'

@@ -16,6 +16,14 @@ class Category(models.Model):
             k = k.parent
         return ' -> '.join(full_path[::-1])
 
+    def get_depth(self):
+        depth = 1
+        k = self.parent
+        while k is not None:
+            depth += 1
+            k = k.parent
+        return depth
+
     class Meta:
         verbose_name_plural = "Categories"
 

@@ -26,64 +26,49 @@
                 </tr>
             </thead>
             <tbody>
-                {% for section in sections %}
-                <!-- Root Category Row -->
-                <tr class="table-light fw-bold">
+                {% for cat in categories %}
+                <tr>
                     <td>
-                        <i class="bi bi-archive text-primary me-2"></i>{{ section.root.name }}
+                        <div class="d-flex align-items-center">
+                            <div class="me-3 p-2 bg-primary bg-opacity-10 rounded text-primary">
+                                <i class="bi bi-folder2-open"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold mb-0">{{ cat.name }}</div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    <i class="bi bi-diagram-3 me-1"></i>{{ cat }}
+                                </small>
+                            </div>
+                        </div>
                     </td>
                     <td>
-                        <span class="badge bg-secondary">{{ section.child_count }} Sub-categories</span>
+                        {% if cat.allow_document_upload %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Accepts Uploads</span>
+                        {% else %}
+                            <span class="badge bg-light text-muted border">No Uploads</span>
+                        {% endif %}
+                        <span class="ms-2 text-muted small">Depth: {{ cat.get_depth }}</span>
                     </td>
-                    <td>-</td>
+                    <td>
+                        <span class="badge bg-light text-dark border p-2">
+                            <i class="bi bi-file-earmark-text text-primary me-1"></i> {{ cat.doc_count }} Documents
+                        </span>
+                    </td>
                     {% if request.user.is_staff %}
                     <td class="text-end">
-                        <a href="{% url 'desktop:category_delete' section.root.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Root Category">
+                        <a href="{% url 'desktop:category_delete' cat.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Category">
                             <i class="bi bi-trash"></i> Delete
                         </a>
                     </td>
                     {% endif %}
                 </tr>
-                
-                {% if section.children %}
-                    {% for child in section.children %}
-                    <tr>
-                        <td class="ps-4">
-                            <i class="bi bi-folder-fill text-warning me-2"></i>
-                            <a href="{% url 'desktop:dashboard' %}?category={{ child.id }}" class="text-decoration-none text-dark">
-                                {{ child.name }}
-                            </a>
-                        </td>
-                        <td><small class="text-muted">Sub-category of {{ section.root.name }}</small></td>
-                        <td>
-                            <span class="badge bg-light text-dark border">
-                                <i class="bi bi-file-earmark-text"></i> {{ child.doc_count }}
-                            </span>
-                        </td>
-                        {% if request.user.is_staff %}
-                        <td class="text-end">
-                            <a href="{% url 'desktop:category_delete' child.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Category">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="{% if request.user.is_staff %}4{% else %}3{% endif %}" class="ps-4 text-muted fst-italic">
-                            No sub-categories defined for this root.
-                        </td>
-                    </tr>
-                {% endif %}
-                
                 {% empty %}
                 <tr>
-                    <td colspan="{% if request.user.is_staff %}4{% else %}3{% endif %}" class="text-center py-4 text-muted">
-                        <div class="mb-2"><i class="bi bi-folder-x fs-2"></i></div>
-                        <strong>No Categories Found.</strong><br>
+                    <td colspan="{% if request.user.is_staff %}4{% else %}3{% endif %}" class="text-center py-5 text-muted">
+                        <div class="mb-3"><i class="bi bi-folder-x fs-1 opacity-25"></i></div>
+                        <h5>No Categories Found</h5>
                         {% if request.user.is_staff %}
-                        Click "New Category" to create your first root category.
+                        <p class="mb-0">Click "New Category" to get started.</p>
                         {% endif %}
                     </td>
                 </tr>
