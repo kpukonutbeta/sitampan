@@ -1,0 +1,38 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Delete Document - SITAMPAN{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card border-danger shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Hapus Dokumen</h4>
+            </div>
+            <div class="card-body text-center py-4">
+                <h5 class="card-title mb-4">Apakah Anda yakin ingin menghapus dokumen ini?</h5>
+                
+                <div class="bg-light p-3 rounded border mb-4 text-start">
+                    <strong>Judul:</strong> {{ document.title }}<br>
+                    <strong>Kategori:</strong> {{ document.category.name }}<br>
+                    <strong>Diunggah:</strong> {{ document.uploaded_at|date:"M d, Y H:i" }}
+                </div>
+                
+                <p class="text-danger mb-4">
+                    <i class="bi bi-info-circle"></i> Ini akan menghapus dokumen dari basis data lokal dan <strong>memindahkan berkas ke tempat sampah di Google Drive</strong>.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'documents:document_list' %}" class="btn btn-outline-secondary px-4">Batal</a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash"></i> Konfirmasi Hapus
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

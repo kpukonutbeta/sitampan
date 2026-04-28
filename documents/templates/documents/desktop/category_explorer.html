@@ -1,0 +1,276 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Category Explorer - SITAMPAN{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <nav aria-label="breadcrumb" class="fs-5">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'documents:category_explorer' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door"></i> Root
+                </a>
+            </li>
+            {% for crumb in breadcrumbs %}
+                {% if forloop.last %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ crumb.name }}</li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'documents:category_explorer_folder' crumb.id %}" class="text-decoration-none">{{ crumb.name }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    <div>
+        <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-list-task"></i> Mode Daftar
+        </a>
+        {% if current_folder and current_folder.allow_document_upload and request.user.is_staff %}
+        <a href="{% url 'documents:document_upload' %}?category={{ current_folder.id }}" class="btn btn-success me-2">
+            <i class="bi bi-cloud-arrow-up"></i> Unggah Dokumen
+        </a>
+        {% endif %}
+        {% if request.user.is_staff %}
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+            <i class="bi bi-folder-plus"></i> Kategori Baru
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body bg-white rounded p-4">
+        {% if children or folder_documents %}
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-4">
+            {% for cat in children %}
+            <div class="col">
+                <a href="{% url 'documents:category_explorer_folder' cat.id %}" class="text-decoration-none text-dark d-block text-center folder-card p-3 rounded transition-hover" data-item-type="category" data-item-id="{{ cat.id }}" data-item-name="{{ cat.name }}" data-cat-allow-upload="{{ cat.allow_document_upload|yesno:'true,false' }}">
+                    <div class="mb-2 position-relative d-inline-block">
+                        <i class="bi bi-folder-fill text-primary" style="font-size: 3.5rem;"></i>
+                        {% if cat.allow_document_upload %}
+                            <i class="bi bi-check-circle-fill text-success bg-white rounded-circle position-absolute" style="font-size: 1.2rem; bottom: 8px; right: -4px; line-height: 1; box-shadow: 0 0 0 2px white;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="fw-bold text-truncate" title="{{ cat.name }}">{{ cat.name }}</div>
+                    <small class="text-muted d-block" style="font-size: 0.75rem;">{{ cat.child_count }} Kategori, {{ cat.doc_count }} Dokumen</small>
+                </a>
+            </div>
+            {% endfor %}
+            
+            {% for doc in folder_documents %}
+            <div class="col">
+                <a href="{{ doc.file.url }}" target="_blank" class="text-decoration-none text-dark d-block text-center folder-card p-3 rounded transition-hover" data-item-type="document" data-item-id="{{ doc.id }}">
+                    <div class="mb-2">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <div class="fw-bold text-truncate" title="{{ doc.title }}">{{ doc.title }}</div>
+                    <small class="text-muted d-block" style="font-size: 0.75rem;">{{ doc.uploaded_at|date:"d M Y" }}</small>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="d-flex flex-column justify-content-center align-items-center py-5 mt-3 mb-3">
+            <i class="bi bi-folder2-open text-muted opacity-50 mb-3" style="font-size: 6rem;"></i>
+            <h4 class="text-muted">Folder ini kosong</h4>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if request.user.is_staff %}
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createCategoryModalLabel">Buat Kategori Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'documents:category_add' %}">
+          <div class="modal-body">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              {% if current_folder %}
+              <input type="hidden" name="parent" value="{{ current_folder.id }}">
+              <div class="mb-3">
+                  <label class="form-label text-muted mb-0">Lokasi saat ini:</label>
+                  <div><strong>{{ current_folder.name }}</strong></div>
+              </div>
+              {% else %}
+              <div class="mb-3">
+                  <label class="form-label text-muted mb-0">Lokasi saat ini:</label>
+                  <div><strong>Root (Level Teratas)</strong></div>
+              </div>
+              {% endif %}
+              
+              <div class="mb-3">
+                  <label for="id_name" class="form-label">Nama Kategori <span class="text-danger">*</span></label>
+                  <input type="text" name="name" class="form-control" id="id_name" required>
+              </div>
+              
+              <div class="mb-3 form-check">
+                  <input type="checkbox" name="allow_document_upload" class="form-check-input" id="id_allow_document_upload" checked>
+                  <label class="form-check-label" for="id_allow_document_upload">Izinkan Unggahan Dokumen</label>
+                  <div class="form-text">Centang ini jika pengguna dapat mengunggah dokumen langsung ke kategori ini. Hapus centang jika ini hanya folder struktural.</div>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Kategori</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Rename Category Modal -->
+<div class="modal fade" id="renameCategoryModal" tabindex="-1" aria-labelledby="renameCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="renameCategoryModalLabel">Ganti Nama Kategori</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" id="renameCategoryForm" action="">
+          <div class="modal-body">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <div class="mb-3">
+                  <label for="id_rename_name" class="form-label">Nama Kategori <span class="text-danger">*</span></label>
+                  <input type="text" name="name" class="form-control" id="id_rename_name" required>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Nama</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Custom Context Menu -->
+<div id="customContextMenu" class="dropdown-menu shadow" style="display:none; position:absolute; z-index:1050;">
+    <button class="dropdown-item" id="ctxMenuRename" type="button"><i class="bi bi-pencil me-2"></i> Ganti Nama</button>
+    <a class="dropdown-item" id="ctxMenuUpload" href="#" style="display:none;"><i class="bi bi-cloud-arrow-up me-2 text-success"></i> Unggah Dokumen</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item text-danger" id="ctxMenuDelete" href="#"><i class="bi bi-trash me-2"></i> Hapus</a>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const contextMenu = document.getElementById("customContextMenu");
+    const ctxMenuRename = document.getElementById("ctxMenuRename");
+    const ctxMenuUpload = document.getElementById("ctxMenuUpload");
+    const ctxMenuDelete = document.getElementById("ctxMenuDelete");
+    const renameForm = document.getElementById("renameCategoryForm");
+    const renameInput = document.getElementById("id_rename_name");
+    
+    document.querySelectorAll(".folder-card").forEach(item => {
+        item.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+            
+            const itemType = this.getAttribute("data-item-type");
+            const itemId = this.getAttribute("data-item-id");
+            
+            if (itemType === "category") {
+                const catName = this.getAttribute("data-item-name");
+                const allowUpload = this.getAttribute("data-cat-allow-upload") === "true";
+                
+                // Set up rename (Modal)
+                if(ctxMenuRename) {
+                    ctxMenuRename.style.display = "block";
+                    ctxMenuRename.onclick = function() {
+                        contextMenu.style.display = "none";
+                        renameForm.action = `/d/categories/${itemId}/edit/`;
+                        renameInput.value = catName;
+                        new bootstrap.Modal(document.getElementById('renameCategoryModal')).show();
+                    };
+                }
+                
+                // Set up delete
+                if(ctxMenuDelete) {
+                    ctxMenuDelete.href = `/d/categories/${itemId}/delete/`;
+                }
+                
+                // Set up upload
+                if(ctxMenuUpload) {
+                    if (allowUpload) {
+                        ctxMenuUpload.style.display = "block";
+                        ctxMenuUpload.href = `/d/upload/?category=${itemId}`;
+                    } else {
+                        ctxMenuUpload.style.display = "none";
+                    }
+                }
+            } else if (itemType === "document") {
+                // Set up rename (Redirect to Document Edit)
+                if(ctxMenuRename) {
+                    ctxMenuRename.style.display = "block";
+                    ctxMenuRename.onclick = function() {
+                        contextMenu.style.display = "none";
+                        window.location.href = `/d/${itemId}/edit/?next=${encodeURIComponent(window.location.pathname)}`;
+                    };
+                }
+                
+                // Set up delete
+                if(ctxMenuDelete) {
+                    ctxMenuDelete.href = `/d/${itemId}/delete/`;
+                }
+                
+                // Hide upload
+                if(ctxMenuUpload) {
+                    ctxMenuUpload.style.display = "none";
+                }
+            }
+            
+            // Show menu
+            contextMenu.style.display = "block";
+            
+            // Calculate boundaries to prevent going off screen
+            let x = e.pageX;
+            let y = e.pageY;
+            
+            // Use a timeout to ensure it is rendered so we can measure it
+            setTimeout(() => {
+                const rect = contextMenu.getBoundingClientRect();
+                if (x + rect.width > window.innerWidth) {
+                    x = window.innerWidth - rect.width - 10;
+                }
+                if (y + rect.height > window.innerHeight + window.scrollY) {
+                    y = window.innerHeight + window.scrollY - rect.height - 10;
+                }
+                contextMenu.style.left = x + "px";
+                contextMenu.style.top = y + "px";
+            }, 0);
+        });
+    });
+    
+    document.addEventListener("click", function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = "none";
+        }
+    });
+    
+    // Hide menu on scroll as it is absolute positioned
+    window.addEventListener("scroll", function() {
+        contextMenu.style.display = "none";
+    });
+});
+</script>
+
+<style>
+    .folder-card {
+        background-color: transparent;
+        border: 1px solid transparent;
+        transition: all 0.2s ease-in-out;
+    }
+    .folder-card:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

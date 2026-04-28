@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SITAMPAN - Categories</title>
+    <title>SITAMPAN - Kategori</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -50,14 +50,18 @@
         <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
             <span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
         </a>
-        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight">All Categories</h1>
+        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight flex-1">Semua Kategori</h1>
+        <a href="{% url 'documents:category_explorer' %}" class="flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-sm">folder_open</span>
+            Explorer
+        </a>
     </header>
 
     <!-- Search Section -->
     <div class="px-4 py-4">
         <div class="relative flex items-center w-full">
             <span class="material-symbols-outlined absolute left-4 text-slate-400">search</span>
-            <input id="categorySearch" class="w-full h-12 rounded-xl bg-slate-200/50 dark:bg-white/5 border-none pl-12 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-500" placeholder="Search categories..." type="text"/>
+            <input id="categorySearch" class="w-full h-12 rounded-xl bg-slate-200/50 dark:bg-white/5 border-none pl-12 pr-4 text-base focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-500" placeholder="Cari kategori..." type="text"/>
         </div>
     </div>
 
@@ -72,8 +76,8 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ cat.name }}</h3>
                     <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mb-1">{{ cat }}</p>
                     <div class="flex items-center gap-3">
-                        <span class="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">{{ cat.doc_count }} Doc</span>
-                        <span class="text-[9px] text-slate-400 font-medium">Depth: {{ cat.get_depth }}</span>
+                        <span class="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">{{ cat.doc_count }} Dok</span>
+                        <span class="text-[9px] text-slate-400 font-medium">Kedalaman: {{ cat.get_depth }}</span>
                     </div>
                 </div>
                 <span class="material-symbols-outlined text-slate-300">chevron_right</span>
@@ -81,7 +85,7 @@
             {% empty %}
             <div class="flex flex-col items-center justify-center py-20 text-slate-400">
                 <span class="material-symbols-outlined text-6xl mb-4">folder_off</span>
-                <p>No categories found.</p>
+                <p>Tidak ada kategori yang ditemukan.</p>
             </div>
             {% endfor %}
         </div>
@@ -91,11 +95,11 @@
     <nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:dashboard' %}">
             <span class="material-symbols-outlined">grid_view</span>
-            <p class="text-[10px] font-medium mt-1">Home</p>
+            <p class="text-[10px] font-medium mt-1">Beranda</p>
         </a>
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:document_list' %}">
             <span class="material-symbols-outlined">folder</span>
-            <p class="text-[10px] font-medium mt-1">Archives</p>
+            <p class="text-[10px] font-medium mt-1">Arsip</p>
         </a>
         {% if request.user.is_staff %}
         <div class="relative -top-6">
@@ -106,17 +110,17 @@
         {% endif %}
         <a class="flex flex-col items-center text-primary" href="{% url 'documents:category_list' %}">
             <span class="material-symbols-outlined filled">category</span>
-            <p class="text-[10px] font-bold mt-1">Categories</p>
+            <p class="text-[10px] font-bold mt-1">Kategori</p>
         </a>
         {% if user.is_authenticated %}
         <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
             <span class="material-symbols-outlined">logout</span>
-            <span class="text-[10px] font-medium mt-1">Logout</span>
+            <span class="text-[10px] font-medium mt-1">Keluar</span>
         </a>
         {% else %}
         <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
             <span class="material-symbols-outlined">login</span>
-            <span class="text-[10px] font-medium mt-1">Login</span>
+            <span class="text-[10px] font-medium mt-1">Masuk</span>
         </a>
         {% endif %}
     </nav>

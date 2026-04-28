@@ -19,11 +19,11 @@ class CategoryForm(forms.ModelForm):
         if parent:
             # Check maximum depth
             if parent.get_depth() >= 5:
-                raise forms.ValidationError("Maximum category depth is 5 levels. Cannot create more subcategories here.")
+                raise forms.ValidationError("Kedalaman kategori maksimum adalah 5 tingkat. Tidak dapat membuat subkategori lebih lanjut di sini.")
             
             # Check for self-reference
             if self.instance and parent == self.instance:
-                raise forms.ValidationError("A category cannot be its own parent.")
+                raise forms.ValidationError("Kategori tidak dapat menjadi induk bagi dirinya sendiri.")
 
         return cleaned_data
 

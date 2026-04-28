@@ -5,13 +5,13 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center gap-3">
-        <h2 class="mb-0">Uploaded Documents</h2>
+        <h2 class="mb-0">Dokumen yang Diunggah</h2>
         <span class="badge rounded-pill bg-light text-success border border-success-subtle py-2 px-3">
-            <i class="bi bi-broadcast"></i> Intranet IP: {{ SERVER_IP }}
+            <i class="bi bi-broadcast"></i> IP Intranet: {{ SERVER_IP }}
         </span>
     </div>
     <a href="{% url 'documents:document_upload' %}" class="btn btn-primary shadow-sm">
-        <i class="bi bi-cloud-arrow-up"></i> Upload Document
+        <i class="bi bi-cloud-arrow-up"></i> Unggah Dokumen
     </a>
 </div>
 
@@ -20,14 +20,14 @@
     <div class="card-body">
         <form method="GET" action="{% url 'documents:dashboard' %}" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label for="q" class="form-label text-muted small mb-1">Keyword</label>
-                <input type="text" name="q" id="q" class="form-control" placeholder="Search by title or abstract..." value="{{ query }}">
+                <label for="q" class="form-label text-muted small mb-1">Kata Kunci</label>
+                <input type="text" name="q" id="q" class="form-control" placeholder="Cari berdasarkan judul atau abstrak..." value="{{ query }}">
             </div>
             
             <div class="col-md-3">
-                <label for="category" class="form-label text-muted small mb-1">Category</label>
+                <label for="category" class="form-label text-muted small mb-1">Kategori</label>
                 <select name="category" id="category" class="form-select">
-                    <option value="">All Categories</option>
+                    <option value="">Semua Kategori</option>
                     {% for cat in categories %}
                         <option value="{{ cat.id }}" {% if category_id == cat.id|stringformat:"s" %}selected{% endif %}>
                             {{ cat.name }}
@@ -37,22 +37,22 @@
             </div>
             
             <div class="col-md-2">
-                <label for="date_from" class="form-label text-muted small mb-1">Date From</label>
+                <label for="date_from" class="form-label text-muted small mb-1">Dari Tanggal</label>
                 <input type="date" name="date_from" id="date_from" class="form-control" value="{{ date_from }}">
             </div>
             
             <div class="col-md-2">
-                <label for="date_to" class="form-label text-muted small mb-1">Date To</label>
+                <label for="date_to" class="form-label text-muted small mb-1">Sampai Tanggal</label>
                 <input type="date" name="date_to" id="date_to" class="form-control" value="{{ date_to }}">
             </div>
 
             <div class="col-md-1">
-                <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
+                <button type="submit" class="btn btn-outline-secondary w-100">Saring</button>
             </div>
             
             {% if query or category_id or date_from or date_to %}
             <div class="col-12 mt-2">
-                <a href="{% url 'documents:dashboard' %}" class="btn btn-sm btn-link text-decoration-none px-0">Clear Filters</a>
+                <a href="{% url 'documents:dashboard' %}" class="btn btn-sm btn-link text-decoration-none px-0">Hapus Penyaring</a>
             </div>
             {% endif %}
         </form>
@@ -64,12 +64,12 @@
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 30%;">Title</th>
-                    <th>Abstract</th>
-                    <th>Category</th>
-                    <th>Date Uploaded</th>
-                    <th>Drive Status</th>
-                    <th style="width: 1%; white-space: nowrap;">Actions</th>
+                    <th style="width: 30%;">Judul</th>
+                    <th>Abstrak</th>
+                    <th>Kategori</th>
+                    <th>Tanggal Diunggah</th>
+                    <th>Status Drive</th>
+                    <th style="width: 1%; white-space: nowrap;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,20 +89,20 @@
                     <td>{{ doc.uploaded_at|date:"M d, Y H:i" }}</td>
                     <td>
                         {% if doc.drive_file_id %}
-                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Synced</span>
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Tersinkronisasi</span>
                         {% else %}
-                            <span class="badge bg-warning text-dark"><i class="bi bi-arrow-repeat"></i> Pending/Failed</span>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-arrow-repeat"></i> Tertunda/Gagal</span>
                         {% endif %}
                     </td>
                     <td class="text-nowrap">
                         <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#previewModal{{ doc.pk }}">
-                            <i class="bi bi-eye"></i> Preview
+                            <i class="bi bi-eye"></i> Pratinjau
                         </button>
                         <a href="{% url 'documents:document_edit' doc.pk %}" class="btn btn-sm btn-outline-warning">
-                            <i class="bi bi-pencil"></i> Edit
+                            <i class="bi bi-pencil"></i> Ubah
                         </a>
                         <a href="{% url 'documents:document_delete' doc.pk %}" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i> Delete
+                            <i class="bi bi-trash"></i> Hapus
                         </a>
 
                         <!-- Preview Modal -->
@@ -111,7 +111,7 @@
                                 <div class="modal-content">
                                     <div class="modal-header bg-info text-white">
                                         <h5 class="modal-title" id="previewModalLabel{{ doc.pk }}">
-                                            <i class="bi bi-file-earmark-pdf"></i> Preview: {{ doc.title }}
+                                            <i class="bi bi-file-earmark-pdf"></i> Pratinjau: {{ doc.title }}
                                         </h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
@@ -121,12 +121,12 @@
                                         {% else %}
                                             <div class="p-5 text-center text-muted">
                                                 <i class="bi bi-exclamation-triangle fs-1"></i>
-                                                <p class="mt-3">File is not available for preview.</p>
+                                                <p class="mt-3">Berkas tidak tersedia untuk pratinjau.</p>
                                             </div>
                                         {% endif %}
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                     </div>
                                 </div>
                             </div>
@@ -135,7 +135,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">No documents found.</td>
+                    <td colspan="6" class="text-center py-4 text-muted">Tidak ada dokumen yang ditemukan.</td>
                 </tr>
                 {% endfor %}
             </tbody>

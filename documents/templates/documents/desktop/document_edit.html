@@ -7,40 +7,43 @@
     <div class="col-md-6">
         <div class="card shadow">
             <div class="card-header bg-warning text-dark">
-                <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Document</h4>
+                <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Ubah Dokumen</h4>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                     
                     <div class="mb-3">
-                        <label for="{{ form.title.id_for_label }}" class="form-label">Document Title</label>
+                        <label for="{{ form.title.id_for_label }}" class="form-label">Judul Dokumen</label>
                         {{ form.title }}
-                        <div class="form-text">Changing the title will automatically rename the file in Google Drive.</div>
+                        <div class="form-text">Mengubah judul secara otomatis akan mengganti nama berkas di Google Drive.</div>
                         {% if form.title.errors %}
                             <div class="text-danger small mt-1">{{ form.title.errors|join:", " }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="mb-4">
-                        <label for="{{ form.abstract.id_for_label }}" class="form-label">Abstract</label>
+                        <label for="{{ form.abstract.id_for_label }}" class="form-label">Abstrak</label>
                         {{ form.abstract }}
-                        <div class="form-text">A brief summary of the document (used for searching).</div>
+                        <div class="form-text">Ringkasan singkat dari dokumen (digunakan untuk pencarian).</div>
                         {% if form.abstract.errors %}
                             <div class="text-danger small mt-1">{{ form.abstract.errors|join:", " }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="mb-4 p-3 bg-light rounded border border-light-subtle">
-                        <strong>Category:</strong> {{ document.category }}<br>
-                        <strong>Uploaded at:</strong> {{ document.uploaded_at|date:"M d, Y H:i" }}<br>
-                        <small class="text-muted"><i class="bi bi-info-circle"></i> Category and file attachment cannot be modified after upload.</small>
+                        <strong>Kategori:</strong> {{ document.category }}<br>
+                        <strong>Diunggah pada:</strong> {{ document.uploaded_at|date:"M d, Y H:i" }}<br>
+                        <small class="text-muted"><i class="bi bi-info-circle"></i> Kategori dan lampiran berkas tidak dapat diubah setelah diunggah.</small>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'documents:dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{% if next %}{{ next }}{% else %}{% url 'documents:dashboard' %}{% endif %}" class="btn btn-outline-secondary">Batal</a>
                         <button type="submit" class="btn btn-warning">
-                            <i class="bi bi-save"></i> Save Changes
+                            <i class="bi bi-save"></i> Simpan Perubahan
                         </button>
                     </div>
                 </form>

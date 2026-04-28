@@ -74,26 +74,26 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'documents:dashboard' %}">Archives</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'documents:dashboard' %}">Arsip</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mobile:dashboard' %}"><i class="bi bi-phone"></i> Mobile Mode</a>
+                        <a class="nav-link" href="{% url 'mobile:dashboard' %}"><i class="bi bi-phone"></i> Mode Seluler</a>
                     </li>
                     {% if request.user.is_staff %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'documents:document_upload' %}">Upload</a>
+                        <a class="nav-link" href="{% url 'documents:document_upload' %}">Unggah</a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'documents:category_list' %}">Categories</a>
+                        <a class="nav-link" href="{% url 'documents:category_list' %}">Kategori</a>
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                        <a class="nav-link" href="{% url 'account_logout' %}">Keluar</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'account_login' %}">Masuk</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -117,12 +117,12 @@
     <nav class="mobile-nav d-md-none">
         <a href="{% url 'documents:dashboard' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <span class="material-symbols-outlined">grid_view</span>
-            <span>Home</span>
+            <span>Beranda</span>
         </a>
         {% if request.user.is_staff %}
         <a href="{% url 'documents:document_list' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'document_list' %}active{% endif %}">
             <span class="material-symbols-outlined">folder</span>
-            <span>Archives</span>
+            <span>Arsip</span>
         </a>
         <a href="{% url 'documents:document_upload' %}" class="mobile-nav-item add-btn-mobile">
             <span class="material-symbols-outlined">add</span>
@@ -130,17 +130,17 @@
         {% endif %}
         <a href="{% url 'documents:category_list' %}" class="mobile-nav-item {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
             <span class="material-symbols-outlined">category</span>
-            <span>Categories</span>
+            <span>Kategori</span>
         </a>
         {% if user.is_authenticated %}
         <a href="{% url 'account_logout' %}" class="mobile-nav-item">
             <span class="material-symbols-outlined">logout</span>
-            <span>Logout</span>
+            <span>Keluar</span>
         </a>
         {% else %}
         <a href="{% url 'account_login' %}" class="mobile-nav-item">
             <span class="material-symbols-outlined">login</span>
-            <span>Login</span>
+            <span>Masuk</span>
         </a>
         {% endif %}
     </nav>

@@ -7,39 +7,39 @@
     <div class="col-md-8">
         <div class="card border-danger shadow">
             <div class="card-header bg-danger text-white">
-                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Delete Category</h4>
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Hapus Kategori</h4>
             </div>
             <div class="card-body">
-                <h5 class="card-title">Are you sure you want to delete the category "<strong>{{ category.name }}</strong>"?</h5>
+                <h5 class="card-title">Apakah Anda yakin ingin menghapus kategori "<strong>{{ category.name }}</strong>"?</h5>
                 
                 <p class="text-danger mt-3">
-                    <i class="bi bi-info-circle"></i> This will also <strong>trash the associated Google Drive folder</strong> and delete any subcategories recursively.
+                    <i class="bi bi-info-circle"></i> Ini juga akan <strong>menghapus folder Google Drive yang terkait</strong> dan menghapus subkategori apa pun secara rekursif.
                 </p>
 
                 {% if affected_documents_count > 0 %}
                 <div class="alert alert-warning mt-4">
-                    <h5><i class="bi bi-file-earmark-text"></i> Documents Found</h5>
-                    <p>There are <strong>{{ affected_documents_count }}</strong> documents inside this category (and its subcategories).</p>
-                    <p>You must select a new category to move these documents to before proceeding. <em>Note that the actual files in Google Drive will not be moved automatically.</em></p>
+                    <h5><i class="bi bi-file-earmark-text"></i> Dokumen Ditemukan</h5>
+                    <p>Terdapat <strong>{{ affected_documents_count }}</strong> dokumen di dalam kategori ini (dan subkategorinya).</p>
+                    <p>Anda harus memilih kategori baru untuk memindahkan dokumen-dokumen ini sebelum melanjutkan. <em>Perhatikan bahwa berkas aktual di Google Drive tidak akan dipindahkan secara otomatis.</em></p>
                     
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="target_category" class="form-label">Move documents to:</label>
+                            <label for="target_category" class="form-label">Pindahkan dokumen ke:</label>
                             <select name="target_category" id="target_category" class="form-select" required>
-                                <option value="" disabled selected>-- Select a target category --</option>
+                                <option value="" disabled selected>-- Pilih kategori tujuan --</option>
                                 {% for cat in available_categories %}
                                     <option value="{{ cat.id }}">{{ cat }}</option>
                                 {% empty %}
-                                    <option value="" disabled>No eligible categories available to move documents to.</option>
+                                    <option value="" disabled>Tidak ada kategori yang memenuhi syarat tersedia untuk memindahkan dokumen.</option>
                                 {% endfor %}
                             </select>
                         </div>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary">Batal</a>
                             <button type="submit" class="btn btn-danger" {% if not available_categories %}disabled{% endif %}>
-                                <i class="bi bi-trash"></i> Move Documents & Delete
+                                <i class="bi bi-trash"></i> Pindahkan Dokumen & Hapus
                             </button>
                         </div>
                     </form>
@@ -47,11 +47,11 @@
                 {% else %}
                 <form method="post" class="mt-4">
                     {% csrf_token %}
-                    <p>No documents will be affected.</p>
+                    <p>Tidak ada dokumen yang akan terpengaruh.</p>
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary">Batal</a>
                         <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash"></i> Delete Category
+                            <i class="bi bi-trash"></i> Hapus Kategori
                         </button>
                     </div>
                 </form>

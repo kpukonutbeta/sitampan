@@ -1,0 +1,363 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>SITAMPAN - Explorer Kategori</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2563eb",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px", "ios": "20px"},
+                },
+            },
+        }
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <style>
+        body { min-height: max(884px, 100dvh); }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex min-h-screen flex-col overflow-x-hidden max-w-lg mx-auto">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-background-light dark:bg-background-dark/95 backdrop-blur-sm p-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+                <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    <span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+                </a>
+                <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight">Explorer</h1>
+            </div>
+            <a href="{% url 'documents:category_list' %}" class="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">Mode Daftar</a>
+        </div>
+        
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center gap-1 text-xs overflow-x-auto pb-1 hide-scrollbar whitespace-nowrap">
+            <a href="{% url 'documents:category_explorer' %}" class="flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[14px]">home</span> Root
+            </a>
+            {% for crumb in breadcrumbs %}
+                <span class="material-symbols-outlined text-[14px] text-slate-300">chevron_right</span>
+                {% if forloop.last %}
+                    <span class="font-bold text-slate-800 dark:text-slate-200">{{ crumb.name }}</span>
+                {% else %}
+                    <a href="{% url 'documents:category_explorer_folder' crumb.id %}" class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">{{ crumb.name }}</a>
+                {% endif %}
+            {% endfor %}
+        </nav>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="px-4 py-3 flex justify-end items-center">
+
+        <div class="flex items-center gap-2">
+            {% if current_folder and current_folder.allow_document_upload and request.user.is_staff %}
+            <a href="{% url 'documents:document_upload' %}?category={{ current_folder.id }}" class="flex items-center gap-1 text-sm text-white bg-green-600 px-4 py-2 rounded-xl shadow-md active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-[18px]">upload</span>
+                Unggah
+            </a>
+            {% endif %}
+            
+            {% if request.user.is_staff %}
+            <button onclick="document.getElementById('createCategoryModal').classList.remove('hidden')" class="flex items-center gap-1 text-sm text-white bg-primary px-4 py-2 rounded-xl shadow-md active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-[18px]">create_new_folder</span>
+                Kategori Baru
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Explorer Grid -->
+    <main class="flex-1 pb-32 px-4">
+        <div class="bg-white dark:bg-slate-800/50 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 p-4">
+            {% if children %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {% for cat in children %}
+                <a href="{% url 'documents:category_explorer_folder' cat.id %}" class="flex flex-col items-center bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50 active:scale-95 transition-transform group explorer-item" data-item-type="category" data-item-id="{{ cat.id }}" data-item-name="{{ cat.name }}" data-cat-allow-upload="{{ cat.allow_document_upload|yesno:'true,false' }}">
+                    <div class="mb-2 relative inline-block">
+                        <span class="material-symbols-outlined filled text-[56px] text-blue-500 group-hover:text-blue-600 transition-colors drop-shadow-sm">folder</span>
+                        {% if cat.allow_document_upload %}
+                            <div class="absolute bottom-1 -right-1 bg-white rounded-full flex items-center justify-center p-[2px] shadow-sm">
+                                <span class="material-symbols-outlined filled text-[18px] text-green-500 leading-none">check_circle</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 text-center w-full truncate mb-1" title="{{ cat.name }}">{{ cat.name }}</h3>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400">{{ cat.child_count }} Kategori &bull; {{ cat.doc_count }} Dokumen</p>
+                </a>
+                {% endfor %}
+                
+                {% for doc in folder_documents %}
+                <a href="{{ doc.file.url }}" target="_blank" class="flex flex-col items-center bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50 active:scale-95 transition-transform group explorer-item" data-item-type="document" data-item-id="{{ doc.id }}">
+                    <div class="mb-2 relative inline-block">
+                        <span class="material-symbols-outlined filled text-[56px] text-red-500 group-hover:text-red-600 transition-colors drop-shadow-sm">description</span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 text-center w-full truncate mb-1" title="{{ doc.title }}">{{ doc.title }}</h3>
+                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400">{{ doc.uploaded_at|date:"d M Y" }}</p>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-20 text-slate-400">
+                <span class="material-symbols-outlined text-[72px] mb-3 opacity-50">folder_open</span>
+                <p class="text-base font-medium">Folder ini kosong</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
+        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:dashboard' %}">
+            <span class="material-symbols-outlined">grid_view</span>
+            <p class="text-[10px] font-medium mt-1">Beranda</p>
+        </a>
+        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:document_list' %}">
+            <span class="material-symbols-outlined">folder</span>
+            <p class="text-[10px] font-medium mt-1">Arsip</p>
+        </a>
+        {% if request.user.is_staff %}
+        <div class="relative -top-6">
+            <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl font-bold">add</span>
+            </a>
+        </div>
+        {% endif %}
+        <a class="flex flex-col items-center text-primary" href="{% url 'documents:category_list' %}">
+            <span class="material-symbols-outlined filled">category</span>
+            <p class="text-[10px] font-bold mt-1">Kategori</p>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-[10px] font-medium mt-1">Keluar</span>
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">login</span>
+            <span class="text-[10px] font-medium mt-1">Masuk</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    {% if request.user.is_staff %}
+    <!-- Create Category Modal -->
+    <div id="createCategoryModal" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('createCategoryModal').classList.add('hidden')"></div>
+        
+        <!-- Modal Content -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl p-6 transform transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Buat Kategori Baru</h3>
+                <button onclick="document.getElementById('createCategoryModal').classList.add('hidden')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form method="post" action="{% url 'documents:category_add' %}" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                
+                <div class="text-sm text-slate-500 dark:text-slate-400 mb-2">
+                    Lokasi saat ini: 
+                    {% if current_folder %}
+                        <input type="hidden" name="parent" value="{{ current_folder.id }}">
+                        <span class="font-bold text-slate-800 dark:text-white">{{ current_folder.name }}</span>
+                    {% else %}
+                        <span class="font-bold text-slate-800 dark:text-white">Root (Level Teratas)</span>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="name" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Nama Kategori <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="name" required class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400">
+                </div>
+                
+                <label class="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl cursor-pointer">
+                    <input type="checkbox" name="allow_document_upload" checked class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600">
+                    <div>
+                        <span class="font-bold text-sm block text-slate-800 dark:text-white">Izinkan Unggahan Dokumen</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 block mt-1">Centang ini jika pengguna dapat mengunggah dokumen langsung ke kategori ini. Hapus centang jika ini hanya folder struktural.</span>
+                    </div>
+                </label>
+                
+                <button type="submit" class="w-full bg-primary text-white font-bold py-4 rounded-xl mt-4 shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                    Simpan Kategori
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Rename Category Modal -->
+    <div id="renameCategoryModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('renameCategoryModal').classList.add('hidden')"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl p-6 transform transition-transform">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Ganti Nama Kategori</h3>
+                <button onclick="document.getElementById('renameCategoryModal').classList.add('hidden')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form method="post" id="renameCategoryForm" action="" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                
+                <div>
+                    <label for="id_rename_name" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Nama Kategori <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="id_rename_name" required class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400">
+                </div>
+                
+                <button type="submit" class="w-full bg-primary text-white font-bold py-4 rounded-xl mt-4 shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                    Simpan Nama
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Context Menu (Action Sheet) -->
+    <div id="customContextMenu" class="fixed inset-0 z-[110] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" id="contextMenuBackdrop"></div>
+        <!-- Menu -->
+        <div class="absolute bottom-4 left-4 right-4 bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden transform transition-transform">
+            <button class="w-full flex items-center gap-3 px-6 py-4 text-left border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" id="ctxMenuRename">
+                <span class="material-symbols-outlined text-slate-500">edit</span>
+                <span class="font-medium text-slate-800 dark:text-slate-200">Ganti Nama</span>
+            </button>
+            <a href="#" class="w-full flex items-center gap-3 px-6 py-4 text-left border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" id="ctxMenuUpload" style="display:none;">
+                <span class="material-symbols-outlined text-green-500">upload</span>
+                <span class="font-medium text-slate-800 dark:text-slate-200">Unggah Dokumen</span>
+            </a>
+            <a href="#" class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" id="ctxMenuDelete">
+                <span class="material-symbols-outlined text-red-500">delete</span>
+                <span class="font-medium text-red-500">Hapus</span>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const contextMenu = document.getElementById("customContextMenu");
+    const ctxMenuBackdrop = document.getElementById("contextMenuBackdrop");
+    const ctxMenuRename = document.getElementById("ctxMenuRename");
+    const ctxMenuUpload = document.getElementById("ctxMenuUpload");
+    const ctxMenuDelete = document.getElementById("ctxMenuDelete");
+    
+    const renameModal = document.getElementById("renameCategoryModal");
+    const renameForm = document.getElementById("renameCategoryForm");
+    const renameInput = document.getElementById("id_rename_name");
+    
+    // For mobile, contextmenu fires on long press
+    document.querySelectorAll(".explorer-item").forEach(item => {
+        item.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+            
+            const itemType = this.getAttribute("data-item-type");
+            const itemId = this.getAttribute("data-item-id");
+            
+            if (itemType === "category") {
+                const catName = this.getAttribute("data-item-name");
+                const allowUpload = this.getAttribute("data-cat-allow-upload") === "true";
+                
+                // Set up rename
+                if(ctxMenuRename) {
+                    ctxMenuRename.style.display = "flex";
+                    ctxMenuRename.onclick = function() {
+                        contextMenu.classList.add("hidden");
+                        renameForm.action = `/d/categories/${itemId}/edit/`;
+                        renameInput.value = catName;
+                        renameModal.classList.remove("hidden");
+                    };
+                }
+                
+                // Set up delete
+                if(ctxMenuDelete) {
+                    ctxMenuDelete.href = `/d/categories/${itemId}/delete/`;
+                }
+                
+                // Set up upload
+                if(ctxMenuUpload) {
+                    if (allowUpload) {
+                        ctxMenuUpload.style.display = "flex";
+                        ctxMenuUpload.href = `/d/upload/?category=${itemId}`;
+                    } else {
+                        ctxMenuUpload.style.display = "none";
+                    }
+                }
+            } else if (itemType === "document") {
+                // Set up rename (Redirect to Document Edit)
+                if(ctxMenuRename) {
+                    ctxMenuRename.style.display = "flex";
+                    ctxMenuRename.onclick = function() {
+                        contextMenu.classList.add("hidden");
+                        window.location.href = `/d/${itemId}/edit/?next=${encodeURIComponent(window.location.pathname)}`;
+                    };
+                }
+                
+                // Set up delete
+                if(ctxMenuDelete) {
+                    ctxMenuDelete.href = `/d/${itemId}/delete/`;
+                }
+                
+                // Hide upload
+                if(ctxMenuUpload) {
+                    ctxMenuUpload.style.display = "none";
+                }
+            }
+            
+            // Show menu
+            contextMenu.classList.remove("hidden");
+        });
+    });
+    
+    if (ctxMenuBackdrop) {
+        ctxMenuBackdrop.addEventListener("click", function() {
+            contextMenu.classList.add("hidden");
+        });
+    }
+});
+</script>
+
+<style>
+    /* Hide scrollbar for horizontal scroll areas */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+</style>
+</body>
+</html>

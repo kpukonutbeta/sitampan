@@ -1,13 +1,17 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en" class="light">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SITAMPAN - Dashboard</title>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SITAMPAN - Dasbor</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
     <style type="text/tailwindcss">
         :root {
             --primary: #2563eb;
@@ -67,7 +71,7 @@
 
             titleEl.textContent = title;
             downloadBtn.href = url;
-            
+
             if (driveUrl) {
                 driveBtn.href = driveUrl;
                 driveBtn.classList.remove('hidden');
@@ -86,7 +90,7 @@
             spinner.style.display = 'flex';
 
             modal.classList.remove('hidden');
-            
+
             // Trigger animations
             setTimeout(() => {
                 backdrop.classList.remove('opacity-0');
@@ -96,7 +100,7 @@
             }, 10);
 
             const fileExt = fileName.split('.').pop().toLowerCase();
-            
+
             if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
                 const img = new Image();
                 img.onload = () => spinner.style.display = 'none';
@@ -114,10 +118,10 @@
                 container.innerHTML = `
                     <div class="text-center p-8">
                         <span class="material-symbols-outlined text-6xl text-outline mb-4">file_present</span>
-                        <p class="text-on-surface-variant mb-6">Preview not available for this file type.</p>
+                        <p class="text-on-surface-variant mb-6">Pratinjau tidak tersedia untuk jenis berkas ini.</p>
                         <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold">
                             <span class="material-symbols-outlined">open_in_new</span>
-                            Open in Browser
+                            Buka di Peramban
                         </a>
                     </div>
                 `;
@@ -144,215 +148,266 @@
         }
     </script>
 </head>
+
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
-<main class="px-5 pb-32 pt-12 max-w-lg mx-auto">
-    <header class="flex justify-between items-center mb-6">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <p class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Welcome back,</p>
-                <div class="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold border border-emerald-500/20">
-                    <span class="material-symbols-outlined text-[10px]">sensors</span>
-                    {{ SERVER_IP }}
-                </div>
-            </div>
-            {% if request.user.is_authenticated %}
-                <h1 class="text-2xl font-bold tracking-tight">{{ request.user.first_name|default:request.user.username }}</h1>
-            {% else %}
-                <h1 class="text-2xl font-bold tracking-tight">SITAMPAN User</h1>
-            {% endif %}
-        </div>
-        <div class="flex items-center gap-3">
-            {% if request.user.is_staff %}
-            <a href="{% url 'desktop:dashboard' %}" class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
-                <span class="hidden sm:inline">Desktop</span>
-            </a>
-            {% endif %}
-            <div class="relative">
-                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center bg-primary text-white">
-                    <span class="material-symbols-outlined">person</span>
+    <main class="px-5 pb-32 pt-12 max-w-lg mx-auto">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <p class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Selamat
+                        datang kembali,</p>
+                    <div
+                        class="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold border border-emerald-500/20">
+                        <span class="material-symbols-outlined text-[10px]">sensors</span>
+                        {{ SERVER_IP }}
+                    </div>
                 </div>
                 {% if request.user.is_authenticated %}
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                <h1 class="text-2xl font-bold tracking-tight">
+                    {{ request.user.first_name|default:request.user.username }}
+                </h1>
                 {% endif %}
             </div>
-        </div>
-    </header>
-
-    <!-- Search Form -->
-    <div class="relative mb-8">
-        <form method="GET" action="{% url 'documents:document_list' %}">
-            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
-                <span class="material-symbols-outlined text-xl">search</span>
-            </span>
-            <input name="q" class="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-800 border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm" placeholder="Search archives..." type="text"/>
-        </form>
-    </div>
-
-    <!-- Main Categories -->
-    <section class="mb-8">
-        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Categories</h2>
-        <div class="grid grid-cols-2 gap-4">
-            {% for cat in main_categories %}
-            <a href="{% url 'documents:document_list' %}?category={{ cat.id }}" class="{% if forloop.first %}bg-primary dark:bg-blue-600 text-white{% else %}bg-white dark:bg-slate-800 text-slate-900 dark:text-white ios-shadow border border-slate-100 dark:border-slate-700/50{% endif %} p-5 rounded-ios relative overflow-hidden group block">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform"></div>
-                <div class="relative z-10">
-                    <div class="w-10 h-10 {% if forloop.first %}bg-white/20{% else %}bg-blue-50 dark:bg-blue-900/30{% endif %} rounded-xl flex items-center justify-center mb-3">
-                        <span class="material-symbols-outlined {% if forloop.first %}text-white{% else %}text-primary{% endif %}">{% if forloop.first %}move_to_inbox{% else %}outbox{% endif %}</span>
+            <div class="flex items-center gap-3">
+                {% if request.user.is_staff %}
+                <a href="{% url 'desktop:dashboard' %}"
+                    class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                    <span class="hidden sm:inline">Desktop</span>
+                </a>
+                {% endif %}
+                <div class="relative">
+                    <div
+                        class="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center bg-primary text-white">
+                        <span class="material-symbols-outlined">person</span>
                     </div>
-                    {% if cat.parent %}
-                        <p class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">{{ cat.parent.name }}</p>
-                    {% else %}
-                        <p class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">Root Category</p>
+                    {% if request.user.is_authenticated %}
+                    <div
+                        class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full">
+                    </div>
                     {% endif %}
-                    <h3 class="text-lg font-bold">{{ cat.name }}</h3>
-                    <p class="text-[10px] {% if forloop.first %}text-white/70{% else %}text-slate-400{% endif %} mt-1">{{ cat.doc_count }} Documents</p>
                 </div>
-            </a>
-            {% empty %}
-            <div class="col-span-2 text-center py-8 bg-white dark:bg-slate-800 rounded-ios text-slate-400 text-sm">
-                No categories found.
             </div>
-            {% endfor %}
-        </div>
-    </section>
+        </header>
 
-    <!-- Sub Categories -->
-    <section class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sub-Kategori</h2>
-            <a href="{% url 'documents:category_list' %}" class="text-primary text-xs font-bold">View All</a>
+        <!-- Search Form -->
+        <div class="relative mb-8">
+            <form method="GET" action="{% url 'documents:document_list' %}">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                    <span class="material-symbols-outlined text-xl">search</span>
+                </span>
+                <input name="q"
+                    class="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-800 border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm"
+                    placeholder="Cari arsip..." type="text" />
+            </form>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-            {% for cat in sub_categories %}
-            <a href="{% url 'documents:document_list' %}?category={{ cat.id }}" class="bg-white dark:bg-slate-800 p-4 rounded-ios ios-shadow border border-slate-50 dark:border-slate-700/30 flex flex-col items-start block transition-transform active:scale-95">
-                <div class="w-10 h-10 {% cycle 'bg-sky-50 dark:bg-sky-900/20' 'bg-indigo-50 dark:bg-indigo-900/20' 'bg-blue-50 dark:bg-blue-900/20' 'bg-slate-100 dark:bg-slate-700/50' %} rounded-full flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined {% cycle 'text-sky-600' 'text-indigo-600' 'text-blue-600' 'text-slate-600 dark:text-slate-300' %} text-xl filled">
-                        {% cycle 'description' 'assignment' 'gavel' 'fact_check' %}
-                    </span>
-                </div>
-                <h4 class="font-bold text-slate-800 dark:text-white text-sm mb-1">{{ cat.name }}</h4>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{{ cat.doc_count }} Dokumen</p>
-            </a>
-            {% empty %}
-            <div class="col-span-2 text-center py-8 text-slate-400 text-xs">
-                Create sub-categories to see them here.
-            </div>
-            {% endfor %}
-        </div>
-    </section>
 
-    <!-- Recent Activity -->
-    <section>
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Recent Activity</h2>
-            {% if request.user.is_staff %}
-            <a href="{% url 'documents:dashboard' %}" class="material-symbols-outlined text-slate-400">more_horiz</a>
-            {% endif %}
-        </div>
-        <div class="space-y-3">
-            {% for doc in recent_documents %}
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl flex items-center gap-4 ios-shadow border border-slate-50 dark:border-slate-700/30 cursor-pointer active:scale-[0.98] transition-transform group" onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
-                <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <span class="material-symbols-outlined text-blue-600 group-hover:text-white text-lg">article</span>
+        <!-- Main Categories -->
+        <section class="mb-8">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Kategori Utama</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for cat in main_categories %}
+                <a href="{% url 'documents:document_list' %}?category={{ cat.id }}"
+                    class="{% if forloop.first %}bg-primary dark:bg-blue-600 text-white{% else %}bg-white dark:bg-slate-800 text-slate-900 dark:text-white ios-shadow border border-slate-100 dark:border-slate-700/50{% endif %} p-5 rounded-ios relative overflow-hidden group block">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="relative z-10">
+                        <div
+                            class="w-10 h-10 {% if forloop.first %}bg-white/20{% else %}bg-blue-50 dark:bg-blue-900/30{% endif %} rounded-xl flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined {% if forloop.first %}text-white{% else %}text-primary{% endif %}">
+                                {% if forloop.first %}
+                                    move_to_inbox
+                                {% else %}
+                                    outbox
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if cat.parent %}
+                        <p
+                            class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">
+                            {{ cat.parent.name }}</p>
+                        {% else %}
+                        <p
+                            class="{% if forloop.first %}text-white/80{% else %}text-slate-500 dark:text-slate-400{% endif %} text-xs font-medium">
+                            Kategori Akar</p>
+                        {% endif %}
+                        <h3 class="text-lg font-bold">{{ cat.name }}</h3>
+                        <p
+                            class="text-[10px] {% if forloop.first %}text-white/70{% else %}text-slate-400{% endif %} mt-1">
+                            {{ cat.doc_count }} Dokumen</p>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="col-span-2 text-center py-8 bg-white dark:bg-slate-800 rounded-ios text-slate-400 text-sm">
+                    Tidak ada kategori yang ditemukan.
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-sm truncate">{{ doc.title }}</h3>
-                    <p class="text-[11px] text-slate-400 mt-0.5">{{ doc.category.name }} • {{ doc.uploaded_at|timesince }} ago</p>
-                </div>
-                <div class="text-slate-300">
-                    <span class="material-symbols-outlined text-xl">chevron_right</span>
-                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700">
-                No recent uploads.
+        </section>
+
+        <!-- Sub Categories -->
+        <section class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Sub-Kategori</h2>
+                <a href="{% url 'documents:category_list' %}" class="text-primary text-xs font-bold">Lihat Semua</a>
             </div>
-            {% endfor %}
-        </div>
-    </section>
-</main><!-- Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
-    <a class="flex flex-col items-center text-primary" href="{% url 'documents:dashboard' %}">
-        <span class="material-symbols-outlined filled">grid_view</span>
-        <p class="text-[10px] font-bold mt-1">Home</p>
-    </a>
-    <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
-        <span class="material-symbols-outlined">folder</span>
-        <span class="text-[10px] font-medium mt-1">Archives</span>
-    </a>
-    {% if request.user.is_staff %}
-    <div class="relative -top-6">
-        <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
-            <span class="material-symbols-outlined text-2xl font-bold">add</span>
+            <div class="grid grid-cols-2 gap-4">
+                {% for cat in sub_categories %}
+                <a href="{% url 'documents:document_list' %}?category={{ cat.id }}"
+                    class="bg-white dark:bg-slate-800 p-4 rounded-ios ios-shadow border border-slate-50 dark:border-slate-700/30 flex flex-col items-start block transition-transform active:scale-95">
+                    <div
+                        class="w-10 h-10 {% cycle 'bg-sky-50 dark:bg-sky-900/20' 'bg-indigo-50 dark:bg-indigo-900/20' 'bg-blue-50 dark:bg-blue-900/20' 'bg-slate-100 dark:bg-slate-700/50' %} rounded-full flex items-center justify-center mb-4">
+                        <span
+                            class="material-symbols-outlined {% cycle 'text-sky-600' 'text-indigo-600' 'text-blue-600' 'text-slate-600 dark:text-slate-300' %} text-xl filled">
+                            {% cycle 'description' 'assignment' 'gavel' 'fact_check' %}
+                        </span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 dark:text-white text-sm mb-1">{{ cat.name }}</h4>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{{ cat.doc_count }} Dokumen
+                    </p>
+                </a>
+                {% empty %}
+                <div class="col-span-2 text-center py-8 text-slate-400 text-xs">
+                    Buat sub-kategori untuk melihatnya di sini.
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Aktivitas Terbaru</h2>
+                {% if request.user.is_staff %}
+                <a href="{% url 'documents:dashboard' %}"
+                    class="material-symbols-outlined text-slate-400">more_horiz</a>
+                {% endif %}
+            </div>
+            <div class="space-y-3">
+                {% for doc in recent_documents %}
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl flex items-center gap-4 ios-shadow border border-slate-50 dark:border-slate-700/30 cursor-pointer active:scale-[0.98] transition-transform group"
+                    onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
+                    <div
+                        class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <span
+                            class="material-symbols-outlined text-blue-600 group-hover:text-white text-lg">article</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-sm truncate">{{ doc.title }}</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ doc.category.name }} • {{
+                            doc.uploaded_at|timesince }} yang lalu</p>
+                    </div>
+                    <div class="text-slate-300">
+                        <span class="material-symbols-outlined text-xl">chevron_right</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div
+                    class="bg-white dark:bg-slate-800 p-8 rounded-2xl text-center text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700">
+                    Tidak ada unggahan terbaru.
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main><!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
+        <a class="flex flex-col items-center text-primary" href="{% url 'documents:dashboard' %}">
+            <span class="material-symbols-outlined filled">grid_view</span>
+            <p class="text-[10px] font-bold mt-1">Beranda</p>
         </a>
-    </div>
-    {% endif %}
-    <a href="{% url 'documents:category_list' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
-        <span class="material-symbols-outlined">category</span>
-        <span class="text-[10px] font-medium mt-1">Categories</span>
-    </a>
-    {% if user.is_authenticated %}
-    <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
-        <span class="material-symbols-outlined">logout</span>
-        <span class="text-[10px] font-medium mt-1">Logout</span>
-    </a>
-    {% else %}
-    <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
-        <span class="material-symbols-outlined">login</span>
-        <span class="text-[10px] font-medium mt-1">Login</span>
-    </a>
-    {% endif %}
-    <!-- Document Preview Modal -->
-    <div id="previewModal" class="fixed inset-0 z-[100] hidden">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300 opacity-0" id="modalBackdrop" onclick="closePreview()"></div>
-        
-        <!-- Modal Content -->
-        <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-slate-900 rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full" id="modalContent">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-                <div class="flex-1 min-w-0 mr-4 text-slate-900 dark:text-white">
-                    <h3 id="previewTitle" class="font-bold truncate">Document Preview</h3>
-                    <p id="previewSubtitle" class="text-xs text-slate-500">Tap to view full screen</p>
+        <a href="{% url 'documents:document_list' %}"
+            class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">folder</span>
+            <span class="text-[10px] font-medium mt-1">Arsip</span>
+        </a>
+        {% if request.user.is_staff %}
+        <div class="relative -top-6">
+            <a href="{% url 'documents:document_upload' %}"
+                class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl font-bold">add</span>
+            </a>
+        </div>
+        {% endif %}
+        <a href="{% url 'documents:category_list' %}"
+            class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">category</span>
+            <span class="text-[10px] font-medium mt-1">Kategori</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-[10px] font-medium mt-1">Keluar</span>
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
+            <span class="material-symbols-outlined">login</span>
+            <span class="text-[10px] font-medium mt-1">Masuk</span>
+        </a>
+        {% endif %}
+        <!-- Document Preview Modal -->
+        <div id="previewModal" class="fixed inset-0 z-[100] hidden">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300 opacity-0"
+                id="modalBackdrop" onclick="closePreview()"></div>
+
+            <!-- Modal Content -->
+            <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-slate-900 rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full"
+                id="modalContent">
+                <!-- Modal Header -->
+                <div
+                    class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex-1 min-w-0 mr-4 text-slate-900 dark:text-white">
+                        <h3 id="previewTitle" class="font-bold truncate">Pratinjau Dokumen</h3>
+                        <p id="previewSubtitle" class="text-xs text-slate-500">Ketuk untuk melihat layar penuh</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a id="folderBtn" href="#" target="_blank"
+                            class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-amber-600 hidden"
+                            title="Open Folder Location">
+                            <span class="material-symbols-outlined">folder_open</span>
+                        </a>
+                        <a id="driveBtn" href="#" target="_blank"
+                            class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-emerald-600 hidden"
+                            title="Buka di Google Drive">
+                            <span class="material-symbols-outlined">add_to_drive</span>
+                        </a>
+                        <a id="downloadBtn" href="#" target="_blank"
+                            class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-primary">
+                            <span class="material-symbols-outlined">download</span>
+                        </a>
+                        <button onclick="closePreview()"
+                            class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <a id="folderBtn" href="#" target="_blank" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-amber-600 hidden" title="Open Folder Location">
-                        <span class="material-symbols-outlined">folder_open</span>
-                    </a>
-                    <a id="driveBtn" href="#" target="_blank" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-emerald-600 hidden" title="Open in Google Drive">
-                        <span class="material-symbols-outlined">add_to_drive</span>
-                    </a>
-                    <a id="downloadBtn" href="#" target="_blank" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-primary">
-                        <span class="material-symbols-outlined">download</span>
-                    </a>
-                    <button onclick="closePreview()" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-600 dark:text-slate-400">
-                        <span class="material-symbols-outlined">close</span>
+
+                <!-- Preview Body -->
+                <div class="flex-1 overflow-hidden relative bg-slate-50 dark:bg-slate-950">
+                    <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center z-10">
+                        <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin">
+                        </div>
+                    </div>
+
+                    <div id="previewContainer" class="w-full h-full flex items-center justify-center p-4">
+                        <!-- Preview content will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-6 pb-12 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                    <button onclick="closePreview()"
+                        class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                        Tutup Pratinjau
                     </button>
                 </div>
             </div>
-            
-            <!-- Preview Body -->
-            <div class="flex-1 overflow-hidden relative bg-slate-50 dark:bg-slate-950">
-                <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center z-10">
-                    <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                </div>
-                
-                <div id="previewContainer" class="w-full h-full flex items-center justify-center p-4">
-                    <!-- Preview content will be injected here -->
-                </div>
-            </div>
-            
-            <!-- Modal Footer -->
-            <div class="p-6 pb-12 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-                <button onclick="closePreview()" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
-                    Close Preview
-                </button>
-            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 </body>
+
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SITAMPAN - Search Results</title>
+    <title>SITAMPAN - Hasil Pencarian</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -107,10 +107,10 @@
                 container.innerHTML = `
                     <div class="text-center p-8">
                         <span class="material-symbols-outlined text-6xl text-outline mb-4">file_present</span>
-                        <p class="text-on-surface-variant mb-6">Preview not available for this file type.</p>
+                        <p class="text-on-surface-variant mb-6">Pratinjau tidak tersedia untuk jenis berkas ini.</p>
                         <a href="${url}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold">
                             <span class="material-symbols-outlined">open_in_new</span>
-                            Open in Browser
+                            Buka di Peramban
                         </a>
                     </div>
                 `;
@@ -152,7 +152,7 @@
             <form method="GET" action="{% url 'documents:document_list' %}">
                 <div class="relative flex items-center bg-slate-200/50 dark:bg-white/5 rounded-ios transition-all duration-300 px-4 py-3 group">
                     <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
-                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3" placeholder="Search archives..." type="text" value="{{ query }}"/>
+                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3" placeholder="Cari arsip..." type="text" value="{{ query }}"/>
                     {% if query %}
                     <a href="{% url 'documents:document_list' %}" class="p-1 hover:bg-primary/10 rounded-full transition-colors">
                         <span class="material-symbols-outlined text-on-surface-variant">close</span>
@@ -165,25 +165,25 @@
         <!-- Chips / Filters -->
         <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
             <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
-                Date
+                Tanggal
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
             <div class="relative group">
                 <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                    Category
+                    Kategori
                     <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
                 </button>
             </div>
             <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                File Type
+                Jenis Berkas
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
         </div>
 
         <!-- Section Label -->
         <div class="flex items-baseline justify-between mb-4 px-1">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Results ({{ documents.count }})</h2>
-            <div class="text-[10px] text-slate-400 font-bold">Sorted by Upload Date</div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Hasil ({{ documents.count }})</h2>
+            <div class="text-[10px] text-slate-400 font-bold">Diurutkan berdasarkan Tanggal Unggah</div>
         </div>
 
         <!-- Search Results List -->
@@ -205,7 +205,7 @@
                         </span>
                         <span class="text-slate-400 text-[10px] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">history</span>
-                            {% if doc.drive_file_id %}Synced{% else %}Local{% endif %}
+                            {% if doc.drive_file_id %}Tersinkronisasi{% else %}Lokal{% endif %}
                         </span>
                     </div>
                 </div>
@@ -215,8 +215,8 @@
                 <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
                     <span class="material-symbols-outlined text-4xl">search_off</span>
                 </div>
-                <h3 class="font-headline font-bold text-on-surface">No documents found</h3>
-                <p class="text-on-surface-variant text-sm mt-2">Try adjusting your keywords or filters.</p>
+                <h3 class="font-headline font-bold text-on-surface">Tidak ada dokumen yang ditemukan</h3>
+                <p class="text-on-surface-variant text-sm mt-2">Coba sesuaikan kata kunci atau penyaring Anda.</p>
             </div>
             {% endfor %}
         </div>
@@ -232,14 +232,14 @@
             <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
                 <div class="flex-1 min-w-0 mr-4">
-                    <h3 id="previewTitle" class="font-headline font-bold text-on-surface truncate">Document Preview</h3>
-                    <p id="previewSubtitle" class="text-xs text-on-surface-variant">Tap to view full screen</p>
+                    <h3 id="previewTitle" class="font-headline font-bold text-on-surface truncate">Pratinjau Dokumen</h3>
+                    <p id="previewSubtitle" class="text-xs text-on-surface-variant">Ketuk untuk melihat layar penuh</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a id="folderBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-amber-600 hidden" title="Open Folder Location">
+                    <a id="folderBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-amber-600 hidden" title="Buka Lokasi Folder">
                         <span class="material-symbols-outlined">folder_open</span>
                     </a>
-                    <a id="driveBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-emerald-600 hidden" title="Open in Google Drive">
+                    <a id="driveBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-emerald-600 hidden" title="Buka di Google Drive">
                         <span class="material-symbols-outlined">add_to_drive</span>
                     </a>
                     <a id="downloadBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-primary">
@@ -265,7 +265,7 @@
             <!-- Modal Footer -->
             <div class="p-6 pb-12 bg-surface-container-lowest border-t border-outline-variant/10">
                 <button onclick="closePreview()" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
-                    Close Preview
+                    Tutup Pratinjau
                 </button>
             </div>
         </div>
@@ -275,11 +275,11 @@
     <nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:dashboard' %}">
             <span class="material-symbols-outlined">grid_view</span>
-            <p class="text-[10px] font-medium mt-1">Home</p>
+            <p class="text-[10px] font-medium mt-1">Beranda</p>
         </a>
     <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center text-primary">
         <span class="material-symbols-outlined filled">folder</span>
-        <p class="text-[10px] font-bold mt-1">Archives</p>
+        <p class="text-[10px] font-bold mt-1">Arsip</p>
     </a>
     {% if request.user.is_staff %}
     <div class="relative -top-6">
@@ -290,17 +290,17 @@
     {% endif %}
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:category_list' %}">
             <span class="material-symbols-outlined">category</span>
-            <p class="text-[10px] font-medium mt-1">Categories</p>
+            <p class="text-[10px] font-medium mt-1">Kategori</p>
         </a>
         {% if user.is_authenticated %}
         <a href="{% url 'account_logout' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
             <span class="material-symbols-outlined">logout</span>
-            <span class="text-[10px] font-medium mt-1">Logout</span>
+            <span class="text-[10px] font-medium mt-1">Keluar</span>
         </a>
         {% else %}
         <a href="{% url 'account_login' %}" class="flex flex-col items-center text-slate-400 dark:text-slate-500">
             <span class="material-symbols-outlined">login</span>
-            <span class="text-[10px] font-medium mt-1">Login</span>
+            <span class="text-[10px] font-medium mt-1">Masuk</span>
         </a>
         {% endif %}
     </nav>

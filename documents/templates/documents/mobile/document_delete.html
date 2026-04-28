@@ -1,0 +1,41 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Delete Document - SITAMPAN{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5 px-3">
+    <div class="col-12 col-md-8">
+        <div class="card border-danger shadow-lg rounded-ios">
+            <div class="card-header bg-danger text-white py-3">
+                <h4 class="mb-0 text-center"><i class="bi bi-exclamation-triangle-fill"></i> Hapus Dokumen</h4>
+            </div>
+            <div class="card-body py-5 px-4 text-center">
+                <h5 class="card-title mb-4 font-bold">Apakah Anda yakin ingin menghapus dokumen ini?</h5>
+                
+                <div class="bg-light dark:bg-slate-800 p-4 rounded-ios border mb-4 text-start">
+                    <p class="mb-1 text-xs text-slate-500 uppercase tracking-wider font-bold">Detail Dokumen</p>
+                    <div class="mb-2"><strong>Judul:</strong> {{ document.title }}</div>
+                    <div class="mb-2"><strong>Kategori:</strong> {{ document.category.name }}</div>
+                    <div><strong>Diunggah:</strong> {{ document.uploaded_at|date:"M d, Y H:i" }}</div>
+                </div>
+                
+                <p class="text-danger mb-5 small">
+                    <i class="bi bi-info-circle"></i> Ini akan menghapus dokumen dari basis data lokal dan <strong>memindahkan berkas ke tempat sampah di Google Drive</strong>.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-danger btn-lg rounded-ios py-3 shadow-sm">
+                            <i class="bi bi-trash"></i> Konfirmasi Hapus
+                        </button>
+                        <a href="{% url 'documents:document_list' %}" class="btn btn-outline-secondary btn-lg rounded-ios py-3">
+                            Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
