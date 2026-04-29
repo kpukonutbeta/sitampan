@@ -219,8 +219,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="font-semibold text-sm truncate">{{ doc.title }}</h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">{{ doc.category.name }} • {{
-                            doc.uploaded_at|timesince }} yang lalu</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ doc.category.name }} • {{ doc.uploaded_at|timesince }} yang lalu</p>
                     </div>
                     {% if request.user.is_staff %}
                     <a href="{% url 'documents:dashboard' %}?q={{ doc.title }}" class="text-slate-300">

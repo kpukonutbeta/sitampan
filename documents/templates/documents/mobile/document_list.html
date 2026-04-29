@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>SITAMPAN - Hasil Pencarian</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -40,11 +45,28 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #191c1d; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .font-headline { font-family: 'Manrope', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #191c1d;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
     <script>
         function openPreview(url, title, fileName, driveUrl, folderUrl) {
@@ -60,7 +82,7 @@
 
             titleEl.textContent = title;
             downloadBtn.href = url;
-            
+
             if (driveUrl) {
                 driveBtn.href = driveUrl;
                 driveBtn.classList.remove('hidden');
@@ -79,7 +101,7 @@
             spinner.style.display = 'flex';
 
             modal.classList.remove('hidden');
-            
+
             // Trigger animations
             setTimeout(() => {
                 backdrop.classList.remove('opacity-0');
@@ -89,7 +111,7 @@
             }, 10);
 
             const fileExt = fileName.split('.').pop().toLowerCase();
-            
+
             if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
                 const img = new Image();
                 img.onload = () => spinner.style.display = 'none';
@@ -137,25 +159,33 @@
         }
     </script>
 </head>
+
 <body class="bg-background dark:bg-slate-900 min-h-screen flex flex-col font-sans">
     <!-- TopAppBar -->
-    <header class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-4 py-4 flex items-center border-b border-primary/10">
-        <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
+    <header
+        class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-4 py-4 flex items-center border-b border-primary/10">
+        <a href="{% url 'documents:dashboard' %}"
+            class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
             <span class="material-symbols-outlined text-on-surface">arrow_back</span>
         </a>
-        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight text-on-surface">Archive Ether</h1>
+        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight text-on-surface">Arsip</h1>
     </header>
 
     <main class="flex-1 px-4 max-w-4xl mx-auto w-full pb-32">
         <!-- SearchBar -->
         <div class="mt-4 mb-6">
             <form method="GET" action="{% url 'documents:document_list' %}">
-                <div class="relative flex items-center bg-slate-200/50 dark:bg-white/5 rounded-ios transition-all duration-300 px-4 py-3 group">
-                    <span class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
-                    <input name="q" class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3" placeholder="Cari arsip..." type="text" value="{{ query }}"/>
+                <div
+                    class="relative flex items-center bg-slate-200/50 dark:bg-white/5 rounded-ios transition-all duration-300 px-4 py-3 group">
+                    <span
+                        class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+                    <input name="q"
+                        class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3"
+                        placeholder="Cari arsip..." type="text" value="{{ query }}" />
                     {% if query %}
-                    <a href="{% url 'documents:document_list' %}" class="p-1 hover:bg-primary/10 rounded-full transition-colors">
-                        <span class="material-symbols-outlined text-on-surface-variant">close</span>
+                    <a href="{% url 'documents:document_list' %}"
+                        class="p-1 hover:bg-primary/10 rounded-full transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant">tutup</span>
                     </a>
                     {% endif %}
                 </div>
@@ -164,17 +194,20 @@
 
         <!-- Chips / Filters -->
         <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
-            <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+            <button
+                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
                 Tanggal
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
             <div class="relative group">
-                <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
+                <button
+                    class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
                     Kategori
                     <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
                 </button>
             </div>
-            <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
+            <button
+                class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
                 Jenis Berkas
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
@@ -189,8 +222,10 @@
         <!-- Search Results List -->
         <div class="space-y-3">
             {% for doc in documents %}
-            <div class="bg-white dark:bg-slate-800 p-4 rounded-ios flex items-center gap-4 transition-all duration-300 ios-shadow border border-slate-50 dark:border-slate-700/30 group cursor-pointer active:scale-[0.98]" onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
-                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-ios flex items-center gap-4 transition-all duration-300 ios-shadow border border-slate-50 dark:border-slate-700/30 group cursor-pointer active:scale-[0.98]"
+                onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
+                <div
+                    class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                     <span class="material-symbols-outlined text-2xl">{% if doc.file.name|lower|slice:"-3:" == "pdf" %}description{% else %}article{% endif %}</span>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -212,7 +247,8 @@
             </div>
             {% empty %}
             <div class="text-center py-12 px-4">
-                <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
+                <div
+                    class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-4 text-outline">
                     <span class="material-symbols-outlined text-4xl">search_off</span>
                 </div>
                 <h3 class="font-headline font-bold text-on-surface">Tidak ada dokumen yang ditemukan</h3>
@@ -225,46 +261,56 @@
     <!-- Document Preview Modal -->
     <div id="previewModal" class="fixed inset-0 z-[100] hidden">
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300 opacity-0" id="modalBackdrop"></div>
-        
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-300 opacity-0"
+            id="modalBackdrop"></div>
+
         <!-- Modal Content -->
-        <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-background-dark rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full" id="modalContent">
+        <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-background-dark rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full"
+            id="modalContent">
             <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
                 <div class="flex-1 min-w-0 mr-4">
-                    <h3 id="previewTitle" class="font-headline font-bold text-on-surface truncate">Pratinjau Dokumen</h3>
+                    <h3 id="previewTitle" class="font-headline font-bold text-on-surface truncate">Pratinjau Dokumen
+                    </h3>
                     <p id="previewSubtitle" class="text-xs text-on-surface-variant">Ketuk untuk melihat layar penuh</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a id="folderBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-amber-600 hidden" title="Buka Lokasi Folder">
+                    <a id="folderBtn" href="#" target="_blank"
+                        class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-amber-600 hidden"
+                        title="Buka Lokasi Folder">
                         <span class="material-symbols-outlined">folder_open</span>
                     </a>
-                    <a id="driveBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-emerald-600 hidden" title="Buka di Google Drive">
+                    <a id="driveBtn" href="#" target="_blank"
+                        class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-emerald-600 hidden"
+                        title="Buka di Google Drive">
                         <span class="material-symbols-outlined">add_to_drive</span>
                     </a>
-                    <a id="downloadBtn" href="#" target="_blank" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-primary">
+                    <a id="downloadBtn" href="#" target="_blank"
+                        class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-primary">
                         <span class="material-symbols-outlined">download</span>
                     </a>
-                    <button onclick="closePreview()" class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
+                    <button onclick="closePreview()"
+                        class="p-2 hover:bg-surface-container-high rounded-full transition-colors text-on-surface">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Preview Body -->
             <div class="flex-1 overflow-hidden relative bg-surface-container-lowest">
                 <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center z-10">
                     <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                 </div>
-                
+
                 <div id="previewContainer" class="w-full h-full flex items-center justify-center p-4">
                     <!-- Preview content will be injected here -->
                 </div>
             </div>
-            
+
             <!-- Modal Footer -->
             <div class="p-6 pb-12 bg-surface-container-lowest border-t border-outline-variant/10">
-                <button onclick="closePreview()" class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                <button onclick="closePreview()"
+                    class="w-full py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform">
                     Tutup Pratinjau
                 </button>
             </div>
@@ -272,23 +318,26 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
+    <nav
+        class="fixed bottom-0 left-0 right-0 z-[60] flex border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl px-8 py-3 pb-8 max-w-lg mx-auto flex justify-between items-center">
         <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:dashboard' %}">
             <span class="material-symbols-outlined">grid_view</span>
             <p class="text-[10px] font-medium mt-1">Beranda</p>
         </a>
-    <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center text-primary">
-        <span class="material-symbols-outlined filled">folder</span>
-        <p class="text-[10px] font-bold mt-1">Arsip</p>
-    </a>
-    {% if request.user.is_staff %}
-    <div class="relative -top-6">
-        <a href="{% url 'documents:document_upload' %}" class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
-            <span class="material-symbols-outlined text-2xl font-bold">add</span>
+        <a href="{% url 'documents:document_list' %}" class="flex flex-col items-center text-primary">
+            <span class="material-symbols-outlined filled">folder</span>
+            <p class="text-[10px] font-bold mt-1">Arsip</p>
         </a>
-    </div>
-    {% endif %}
-        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500" href="{% url 'documents:category_list' %}">
+        {% if request.user.is_staff %}
+        <div class="relative -top-6">
+            <a href="{% url 'documents:document_upload' %}"
+                class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/40 active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-2xl font-bold">add</span>
+            </a>
+        </div>
+        {% endif %}
+        <a class="flex flex-col items-center text-slate-400 dark:text-slate-500"
+            href="{% url 'documents:category_list' %}">
             <span class="material-symbols-outlined">category</span>
             <p class="text-[10px] font-medium mt-1">Kategori</p>
         </a>
@@ -305,4 +354,5 @@
         {% endif %}
     </nav>
 </body>
+
 </html>

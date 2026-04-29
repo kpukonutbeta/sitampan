@@ -29,16 +29,32 @@ def dashboard(request):
     # Fetch recent documents (Top 5)
     recent_documents = Document.objects.all().order_by('-uploaded_at')[:5]
     
-    # Fetch categories with document counts
-    all_categories = Category.objects.annotate(doc_count=Count('documents'))
+    # Fetch all categories and their direct document counts
+    categories_list = list(Category.objects.all())
+    cat_dict = {c.id: c for c in categories_list}
+    for c in categories_list:
+        c.doc_count = 0
+        
+    # Get direct counts per category
+    direct_counts = Document.objects.values('category_id').annotate(count=Count('id'))
+    for entry in direct_counts:
+        cat_id = entry['category_id']
+        count = entry['count']
+        curr = cat_dict.get(cat_id)
+        while curr:
+            curr.doc_count += count
+            if curr.parent_id:
+                curr = cat_dict.get(curr.parent_id)
+            else:
+                curr = None
     
     # Split into 'Main' (Root) and 'Sub' categories for the UI
-    main_categories = all_categories.filter(parent=None)[:2] # Taking first 2 as 'Main'
-    sub_categories = all_categories.exclude(parent=None)[:4]   # Taking next 4 as 'Sub'
+    main_categories = [c for c in categories_list if c.parent_id is None][:2]
+    sub_categories = [c for c in categories_list if c.parent_id is not None][:4]
     
     # In case there are no sub-categories yet, just show more roots or empty
-    if not sub_categories.exists():
-        sub_categories = all_categories.filter(parent=None)[2:6]
+    if not sub_categories:
+        sub_categories = [c for c in categories_list if c.parent_id is None][2:6]
 
     return render(request, resolve_template(request, 'dashboard.html'), {
         'recent_documents': recent_documents,
@@ -66,7 +82,16 @@ def document_list(request):
         )
         
     if category_id:
-        documents = documents.filter(category_id=category_id)
+        # Get the category and all its descendants
+        category_ids = [category_id]
+        to_check = [category_id]
+        while to_check:
+            next_level = list(Category.objects.filter(parent_id__in=to_check).values_list('id', flat=True))
+            if not next_level:
+                break
+            category_ids.extend(next_level)
+            to_check = next_level
+        documents = documents.filter(category_id__in=category_ids)
         
     if date_from:
         documents = documents.filter(uploaded_at__date__gte=date_from)
@@ -143,6 +168,31 @@ def category_explorer(request, folder_id=None):
     current_folder = None
     breadcrumbs = []
     
+    # Fetch all categories and calculate recursive counts
+    all_categories = list(Category.objects.all())
+    cat_dict = {c.id: c for c in all_categories}
+    for c in all_categories:
+        c.doc_count = 0
+        c.child_count = 0
+        
+    direct_doc_counts = Document.objects.values('category_id').annotate(count=Count('id'))
+    for entry in direct_doc_counts:
+        cat_id = entry['category_id']
+        count = entry['count']
+        curr = cat_dict.get(cat_id)
+        while curr:
+            curr.doc_count += count
+            if curr.parent_id:
+                curr = cat_dict.get(curr.parent_id)
+            else:
+                curr = None
+                
+    for c in all_categories:
+        if c.parent_id:
+            parent = cat_dict.get(c.parent_id)
+            if parent:
+                parent.child_count += 1
+
     if folder_id:
         current_folder = get_object_or_404(Category, pk=folder_id)
         # Build breadcrumbs
@@ -150,16 +200,14 @@ def category_explorer(request, folder_id=None):
         while node is not None:
             breadcrumbs.insert(0, node)
             node = node.parent
-        children = Category.objects.filter(parent=current_folder).annotate(
-            doc_count=Count('documents', distinct=True),
-            child_count=Count('children', distinct=True)
-        ).order_by('name')
+        # Get children of current folder from our prepared list
+        children = [c for c in all_categories if c.parent_id == current_folder.id]
+        children.sort(key=lambda x: x.name)
         folder_documents = Document.objects.filter(category=current_folder).order_by('-uploaded_at')
     else:
-        children = Category.objects.filter(parent__isnull=True).annotate(
-            doc_count=Count('documents', distinct=True),
-            child_count=Count('children', distinct=True)
-        ).order_by('name')
+        # Get roots
+        children = [c for c in all_categories if c.parent_id is None]
+        children.sort(key=lambda x: x.name)
         folder_documents = []
         
     return render(request, resolve_template(request, 'category_explorer.html'), {

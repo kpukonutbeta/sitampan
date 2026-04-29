@@ -23,7 +23,7 @@
         </ol>
     </nav>
     <div>
-        <a href="{% url 'documents:category_list' %}" class="btn btn-outline-secondary me-2">
+        <a href="{% url 'documents:category_grid' %}" class="btn btn-outline-secondary me-2">
             <i class="bi bi-list-task"></i> Mode Daftar
         </a>
         {% if current_folder and current_folder.allow_document_upload and request.user.is_staff %}
