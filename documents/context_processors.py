@@ -1,5 +1,14 @@
-import socket
 import netifaces
+from .models import SiteSettings
+
+def site_settings(request):
+    try:
+        settings = SiteSettings.load()
+    except Exception:
+        settings = {'theme_color': '#2563eb'}
+    return {
+        'site_settings': settings
+    }
 
 def local_ip(request):
     """

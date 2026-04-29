@@ -15,4 +15,5 @@ urlpatterns = [
     path('explorer/<int:folder_id>/', views.category_explorer, name='category_explorer_folder'),
     path('<int:pk>/edit/', views.document_edit, name='document_edit'),
     path('<int:pk>/delete/', views.document_delete, name='document_delete'),
+    path('settings/', views.site_settings_view, name='settings'),
 ]

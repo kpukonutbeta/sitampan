@@ -1,0 +1,60 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Pengaturan Tema - SITAMPAN{% endblock %}
+
+{% block content %}
+<div class="px-5 pt-12 pb-32 max-w-lg mx-auto">
+    <header class="flex items-center gap-3 mb-8">
+        <a href="{% url 'documents:dashboard' %}" class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Pengaturan Tema</h1>
+    </header>
+
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700/50">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.theme_color.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Warna Utama (Primary Color)</label>
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 flex-shrink-0">
+                        {{ form.theme_color }}
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Pilih warna tema utama untuk mode Desktop dan Seluler.</p>
+                </div>
+                {% if form.theme_color.errors %}
+                    <div class="text-red-500 text-xs mt-2">{{ form.theme_color.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span>
+                    Simpan Pengaturan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Override input color styling for mobile to make it look native */
+    input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        cursor: pointer;
+        background: transparent;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: 0;
+    }
+</style>
+{% endblock %}

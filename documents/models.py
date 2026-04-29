@@ -1,6 +1,20 @@
 from django.db import models
 from django.core.validators import FileExtensionValidator
 import os
+class SiteSettings(models.Model):
+    theme_color = models.CharField(max_length=50, default="#2563eb", help_text="Hex color code for primary theme")
+    
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    class Meta:
+        verbose_name_plural = "Site Settings"
 
 class Category(models.Model):
     name = models.CharField(max_length=255)

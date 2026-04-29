@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 import threading
 from django.contrib import messages
-from .models import Document, Category
-from .forms import DocumentForm, CategoryForm, DocumentEditForm
+from .models import Document, Category, SiteSettings
+from .forms import DocumentForm, CategoryForm, DocumentEditForm, SiteSettingsForm
 from .drive_services import delete_drive_folder, rename_drive_file
 from .utils import rename_local_file
 
@@ -316,3 +316,17 @@ def document_delete(request, pk):
         return redirect('documents:document_list')
         
     return render(request, resolve_template(request, 'document_delete.html'), {'document': document})
+
+@staff_member_required
+def site_settings_view(request):
+    settings = SiteSettings.load()
+    if request.method == 'POST':
+        form = SiteSettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Pengaturan tema berhasil diperbarui.')
+            return redirect('documents:settings')
+    else:
+        form = SiteSettingsForm(instance=settings)
+        
+    return render(request, resolve_template(request, 'settings.html'), {'form': form})

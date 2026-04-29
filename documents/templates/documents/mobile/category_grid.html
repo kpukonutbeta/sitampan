@@ -14,7 +14,7 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2563eb",
+                        "primary": "{{ site_settings.theme_color|default:'#2563eb' }}",
                         "background-light": "#f8f6f6",
                         "background-dark": "#0f172a",
                     },

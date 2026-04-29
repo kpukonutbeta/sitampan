@@ -1,0 +1,38 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Pengaturan Tema - SITAMPAN{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-palette"></i> Pengaturan Tema</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.theme_color.id_for_label }}" class="form-label fw-bold">Warna Utama (Primary Color)</label>
+                        <div class="d-flex align-items-center gap-3">
+                            {{ form.theme_color }}
+                            <div class="text-muted small">Pilih warna untuk menyesuaikan tampilan aplikasi secara keseluruhan.</div>
+                        </div>
+                        {% if form.theme_color.errors %}
+                            <div class="text-danger small mt-1">{{ form.theme_color.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'documents:dashboard' %}" class="btn btn-outline-secondary">Batal</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Simpan Peraturan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

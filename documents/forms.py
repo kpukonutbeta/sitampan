@@ -50,3 +50,12 @@ class DocumentEditForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'abstract': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+class SiteSettingsForm(forms.ModelForm):
+    class Meta:
+        from .models import SiteSettings
+        model = SiteSettings
+        fields = ['theme_color']
+        widgets = {
+            'theme_color': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'title': 'Pilih Warna Tema'})
+        }

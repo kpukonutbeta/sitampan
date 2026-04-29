@@ -14,7 +14,7 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2563eb",
+                        "primary": "{{ site_settings.theme_color|default:'#2563eb' }}",
                         "background-light": "#f8f6f6",
                         "background-dark": "#0f172a",
                     },
@@ -101,7 +101,7 @@
                 {% for cat in children %}
                 <a href="{% url 'documents:category_explorer_folder' cat.id %}" class="flex flex-col items-center bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50 active:scale-95 transition-transform group explorer-item" data-item-type="category" data-item-id="{{ cat.id }}" data-item-name="{{ cat.name }}" data-cat-allow-upload="{{ cat.allow_document_upload|yesno:'true,false' }}">
                     <div class="mb-2 relative inline-block">
-                        <span class="material-symbols-outlined filled text-[56px] text-blue-500 group-hover:text-blue-600 transition-colors drop-shadow-sm">folder</span>
+                        <span class="material-symbols-outlined filled text-[56px] text-primary group-hover:opacity-80 transition-opacity drop-shadow-sm">folder</span>
                         {% if cat.allow_document_upload %}
                             <div class="absolute bottom-1 -right-1 bg-white rounded-full flex items-center justify-center p-[2px] shadow-sm">
                                 <span class="material-symbols-outlined filled text-[18px] text-green-500 leading-none">check_circle</span>

@@ -13,7 +13,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#2563eb",
+                        primary: "{{ site_settings.theme_color|default:'#2563eb' }}",
                         "primary-container": "#eff6ff",
                         "on-primary-container": "#1e40af",
                         background: "#F9FAFB",
