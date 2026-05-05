@@ -125,39 +125,14 @@
   </div>
 </div>
 
-<!-- Rename Category Modal -->
-<div class="modal fade" id="renameCategoryModal" tabindex="-1" aria-labelledby="renameCategoryModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="renameCategoryModalLabel">Ganti Nama Kategori</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form method="post" id="renameCategoryForm" action="">
-          <div class="modal-body">
-              {% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.path }}">
-              <div class="mb-3">
-                  <label for="id_rename_name" class="form-label">Nama Kategori <span class="text-danger">*</span></label>
-                  <input type="text" name="name" class="form-control" id="id_rename_name" required>
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Nama</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
+
 {% endif %}
 
 <!-- Custom Context Menu -->
 <div id="customContextMenu" class="dropdown-menu shadow" style="display:none; position:absolute; z-index:1050;">
-    <button class="dropdown-item" id="ctxMenuRename" type="button"><i class="bi bi-pencil me-2"></i> Ganti Nama</button>
+    <button class="dropdown-item" id="ctxMenuRename" type="button"><i class="bi bi-pencil me-2"></i> Ubah</button>
     <a class="dropdown-item" id="ctxMenuUpload" href="#" style="display:none;"><i class="bi bi-cloud-arrow-up me-2 text-success"></i> Unggah Dokumen</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item text-danger" id="ctxMenuDelete" href="#"><i class="bi bi-trash me-2"></i> Hapus</a>
+</div>
 </div>
 
 <script>
@@ -185,15 +160,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     ctxMenuRename.style.display = "block";
                     ctxMenuRename.onclick = function() {
                         contextMenu.style.display = "none";
-                        renameForm.action = `/d/categories/${itemId}/edit/`;
-                        renameInput.value = catName;
-                        new bootstrap.Modal(document.getElementById('renameCategoryModal')).show();
+                        window.location.href = `/d/categories/${itemId}/edit/?next=${encodeURIComponent(window.location.pathname)}`;
                     };
                 }
                 
-                // Set up delete
+                // Hide delete
                 if(ctxMenuDelete) {
-                    ctxMenuDelete.href = `/d/categories/${itemId}/delete/`;
+                    ctxMenuDelete.style.display = "none";
                 }
                 
                 // Set up upload

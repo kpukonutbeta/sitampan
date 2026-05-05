@@ -40,11 +40,18 @@
                         <small class="text-muted"><i class="bi bi-info-circle"></i> Category and file attachment cannot be modified after upload.</small>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% if next %}{{ next }}{% else %}{% url 'documents:dashboard' %}{% endif %}" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="bi bi-save"></i> Save Changes
-                        </button>
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a href="{% url 'documents:document_delete' document.pk %}" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Hapus
+                            </a>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% if next %}{{ next }}{% else %}{% url 'documents:dashboard' %}{% endif %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

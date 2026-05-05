@@ -1,10 +1,10 @@
-{% load socialaccount %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>SITAMPAN - Masuk</title>
+    <title>SITAMPAN - Keluar</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -85,12 +85,8 @@
         .inner-glow {
             box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
         }
-        .glass-overlay {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(24px);
-        }
         body {
-            min-height: max(884px, 100dvh);
+            min-height: 100dvh;
         }
     </style>
 </head>
@@ -112,92 +108,33 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white mb-6 cloud-shadow border border-outline-variant/15 p-3 mx-auto">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="w-full h-full object-contain">
                 </div>
-                <h2 class="font-headline text-[2.75rem] leading-tight font-bold text-on-surface mb-2">Selamat datang kembali</h2>
-                <p class="text-on-surface-variant font-body">Akses arsip digital dan catatan terkelola Anda.</p>
+                <h2 class="font-headline text-[2.75rem] leading-tight font-bold text-on-surface mb-2">Konfirmasi Keluar</h2>
+                <p class="text-on-surface-variant font-body">Apakah Anda yakin ingin keluar dari SITAMPAN?</p>
             </div>
 
-            <!-- Error Messages from Allauth -->
-            {% if form.errors %}
-            <div class="mb-4 bg-error-container text-on-error-container p-4 rounded-xl text-sm border border-error/20">
-                Harap perbaiki kesalahan di bawah ini.
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
-            
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                <div class="p-4 rounded-xl text-sm {% if message.tags == 'error' %}bg-error-container text-on-error-container border border-error/20{% else %}bg-primary-fixed text-on-primary-fixed border border-primary/20{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Sign In Card -->
+            <!-- Sign Out Card -->
             <div class="bg-surface-container-lowest p-10 rounded-3xl cloud-shadow border border-outline-variant/15">
-                
-                <!-- Google Login Button (Primary Action) -->
-                <form action="{% provider_login_url 'google' %}" method="post" class="w-full">
-                    {% csrf_token %}
-                    <button class="w-full bg-surface-container-lowest border border-outline-variant/50 py-4 rounded-3xl flex items-center justify-center gap-3 hover:bg-surface-container-low transition-all shadow-sm" type="submit">
-                        <img alt="Google Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCefilNI_-xN_2HU3yMsaLXHYxc7tCW8RGm_OzvSHQJr2svKEpDGVh_qKDiRMIOauZ-MjK-TXnImB8aymBNHaqsdvcUoESNXNMP9y7im6sxYpQbjwLmQpj0hJ7FhOrtG2lUqW8UX1v6-Tdn3xkD7eBGxeod98LJXNuvjTTRVx6hEAuFbpYPVRoDImyou_LL84QOQexMVS7k4fukjy5L1JYK6zULk06lcdCfleMGQD3MyFf0rZpHJH8EvBRf800A9c0wpFJsRjU47uE"/>
-                        <span class="font-semibold text-on-surface-variant">Masuk dengan Google</span>
-                    </button>
-                </form>
-
-                <!-- Divider -->
-                <div class="relative py-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full h-px bg-surface-container-high"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="bg-surface-container-lowest px-4 text-[0.75rem] font-medium text-outline uppercase tracking-widest">atau gunakan akun lokal</span>
-                    </div>
-                </div>
-
-                <form class="space-y-6" method="POST" action="{% url 'account_login' %}">
+                <form method="POST" action="{% url 'account_logout' %}">
                     {% csrf_token %}
                     {% if redirect_field_value %}
                     <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                     {% endif %}
 
-                    <!-- Input Fields -->
-                    <div class="space-y-1.5">
-                        <label class="text-[0.875rem] font-medium text-on-surface-variant ml-1" for="id_login">Email atau Nama Pengguna</label>
-                        <div class="relative">
-                            <input id="id_login" name="login" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest transition-all" placeholder="Nama Pengguna atau Email" type="text" required/>
-                        </div>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <div class="flex justify-between items-center ml-1">
-                            <label class="text-[0.875rem] font-medium text-on-surface-variant" for="id_password">Kata Sandi</label>
-                            <!-- Django Allauth Password Reset Link -->
-                            <a class="text-[0.75rem] font-semibold text-primary hover:text-surface-tint transition-colors" href="{% url 'account_reset_password' %}">Lupa Kata Sandi?</a>
-                        </div>
-                        <div class="relative">
-                            <input id="id_password" name="password" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest transition-all" placeholder="Masukkan kata sandi Anda" type="password" required/>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center ml-1 mt-2">
-                        <input type="checkbox" name="remember" id="id_remember" class="w-4 h-4 text-primary bg-surface-container-low border-none rounded focus:ring-primary-container/20">
-                        <label for="id_remember" class="ml-2 text-[0.875rem] text-on-surface-variant">Ingat Saya</label>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="pt-2">
+                    <div class="space-y-4">
                         <button class="w-full primary-gradient text-on-primary font-semibold py-4 rounded-3xl inner-glow hover:opacity-90 transition-all flex items-center justify-center gap-2" type="submit">
-                            <span>Masuk</span>
-                            <span class="material-symbols-outlined text-[20px]" data-icon="login">login</span>
+                            <span>Ya, Keluar</span>
+                            <span class="material-symbols-outlined text-[20px]">logout</span>
                         </button>
+                        
+                        <a href="{% url 'documents:dashboard' %}" class="w-full bg-surface-container-low text-on-surface-variant font-semibold py-4 rounded-3xl hover:bg-surface-container-high transition-all flex items-center justify-center gap-2">
+                            <span>Batal</span>
+                        </a>
                     </div>
                 </form>
             </div>
             
-            <p class="text-center mt-10 text-on-surface-variant font-body">
-                Hanya admin yang berwenang yang diizinkan untuk mengakses SITAMPAN.
+            <p class="text-center mt-10 text-on-surface-variant font-body text-sm">
+                Terima kasih telah menggunakan SITAMPAN. Sesi Anda akan diakhiri dengan aman.
             </p>
         </div>
     </main>

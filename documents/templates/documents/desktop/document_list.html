@@ -101,9 +101,6 @@
                         <a href="{% url 'documents:document_edit' doc.pk %}" class="btn btn-sm btn-outline-warning">
                             <i class="bi bi-pencil"></i> Ubah
                         </a>
-                        <a href="{% url 'documents:document_delete' doc.pk %}" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i> Hapus
-                        </a>
 
                         <!-- Preview Modal -->
                         <div class="modal fade" id="previewModal{{ doc.pk }}" tabindex="-1" aria-labelledby="previewModalLabel{{ doc.pk }}" aria-hidden="true">

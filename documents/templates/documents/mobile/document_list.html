@@ -168,7 +168,10 @@
             class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
             <span class="material-symbols-outlined text-on-surface">arrow_back</span>
         </a>
-        <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight text-on-surface">Arsip</h1>
+        <div class="flex items-center gap-2 ml-2">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="h-6 w-auto">
+            <h1 class="text-xl font-bold leading-tight tracking-tight text-on-surface">Arsip</h1>
+        </div>
     </header>
 
     <main class="flex-1 px-4 max-w-4xl mx-auto w-full pb-32">
@@ -185,7 +188,7 @@
                     {% if query %}
                     <a href="{% url 'documents:document_list' %}"
                         class="p-1 hover:bg-primary/10 rounded-full transition-colors">
-                        <span class="material-symbols-outlined text-on-surface-variant">tutup</span>
+                        <span class="material-symbols-outlined text-on-surface-variant">close</span>
                     </a>
                     {% endif %}
                 </div>

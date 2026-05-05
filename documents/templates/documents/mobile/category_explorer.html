@@ -52,7 +52,10 @@
                 <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
                     <span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
                 </a>
-                <h1 class="ml-2 text-xl font-bold leading-tight tracking-tight">Explorer</h1>
+                <div class="flex items-center gap-2 ml-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="h-6 w-auto">
+                    <h1 class="text-xl font-bold leading-tight tracking-tight">Explorer</h1>
+                </div>
             </div>
             <a href="{% url 'documents:category_grid' %}" class="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full">Mode Daftar</a>
         </div>
@@ -369,32 +372,7 @@
     </div>
     {% endif %}
 
-    <!-- Rename Category Modal -->
-    <div id="renameCategoryModal" class="fixed inset-0 z-[100] hidden">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('renameCategoryModal').classList.add('hidden')"></div>
-        <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl p-6 transform transition-transform">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800 dark:text-white">Ganti Nama Kategori</h3>
-                <button onclick="document.getElementById('renameCategoryModal').classList.add('hidden')" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-500">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            
-            <form method="post" id="renameCategoryForm" action="" class="space-y-4">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.path }}">
-                
-                <div>
-                    <label for="id_rename_name" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Nama Kategori <span class="text-red-500">*</span></label>
-                    <input type="text" name="name" id="id_rename_name" required class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-white placeholder:text-slate-400">
-                </div>
-                
-                <button type="submit" class="w-full bg-primary text-white font-bold py-4 rounded-xl mt-4 shadow-lg shadow-primary/30 active:scale-95 transition-transform">
-                    Simpan Nama
-                </button>
-            </form>
-        </div>
-    </div>
+
 
     <!-- Mobile Context Menu (Action Sheet) -->
     <div id="customContextMenu" class="fixed inset-0 z-[110] hidden">
@@ -404,15 +382,11 @@
         <div class="absolute bottom-4 left-4 right-4 bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden transform transition-transform">
             <button class="w-full flex items-center gap-3 px-6 py-4 text-left border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" id="ctxMenuRename">
                 <span class="material-symbols-outlined text-slate-500">edit</span>
-                <span class="font-medium text-slate-800 dark:text-slate-200">Ganti Nama</span>
+                <span class="font-medium text-slate-800 dark:text-slate-200">Ubah</span>
             </button>
-            <a href="#" class="w-full flex items-center gap-3 px-6 py-4 text-left border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" id="ctxMenuUpload" style="display:none;">
+            <a href="#" class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors" id="ctxMenuUpload" style="display:none;">
                 <span class="material-symbols-outlined text-green-500">upload</span>
                 <span class="font-medium text-slate-800 dark:text-slate-200">Unggah Dokumen</span>
-            </a>
-            <a href="#" class="w-full flex items-center gap-3 px-6 py-4 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" id="ctxMenuDelete">
-                <span class="material-symbols-outlined text-red-500">delete</span>
-                <span class="font-medium text-red-500">Hapus</span>
             </a>
         </div>
     </div>
@@ -448,15 +422,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     ctxMenuRename.style.display = "flex";
                     ctxMenuRename.onclick = function() {
                         contextMenu.classList.add("hidden");
-                        renameForm.action = `/d/categories/${itemId}/edit/`;
-                        renameInput.value = catName;
-                        renameModal.classList.remove("hidden");
+                        window.location.href = `/d/categories/${itemId}/edit/?next=${encodeURIComponent(window.location.pathname)}`;
                     };
                 }
                 
-                // Set up delete
+                // Hide delete
                 if(ctxMenuDelete) {
-                    ctxMenuDelete.href = `/d/categories/${itemId}/delete/`;
+                    ctxMenuDelete.style.display = "none";
                 }
                 
                 // Set up upload
@@ -478,9 +450,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     };
                 }
                 
-                // Set up delete
+                // Hide delete
                 if(ctxMenuDelete) {
-                    ctxMenuDelete.href = `/d/${itemId}/delete/`;
+                    ctxMenuDelete.style.display = "none";
                 }
                 
                 // Hide upload

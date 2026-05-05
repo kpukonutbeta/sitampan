@@ -44,11 +44,20 @@
                         {% endif %}
                     </div>
                     
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% if next %}{{ next }}{% else %}{% url 'documents:category_list' %}{% endif %}" class="btn btn-outline-secondary">Batal</a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-save"></i> Simpan Kategori
-                        </button>
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            {% if category %}
+                            <a href="{% url 'documents:category_delete' category.pk %}" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i> Hapus
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% if next %}{{ next }}{% else %}{% url 'documents:category_list' %}{% endif %}" class="btn btn-outline-secondary">Batal</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> {% if category %}Simpan Perubahan{% else %}Simpan Kategori{% endif %}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

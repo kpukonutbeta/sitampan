@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | SITAMPAN Admin{% endblock %}
+
+{% block branding %}
+<div id="site-name" style="display: flex; align-items: center; gap: 10px;">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" style="height: 35px; width: auto; filter: drop-shadow(0 0 2px rgba(0,0,0,0.2));">
+    <a href="{% url 'admin:index' %}" style="font-weight: 700; font-size: 20px; color: white; text-decoration: none;">
+        SITAMPAN ADMIN
+    </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
