@@ -122,6 +122,11 @@
                     onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
                     <div class="mb-2 relative inline-block">
                         <span class="material-symbols-outlined filled text-[56px] text-red-500 group-hover:text-red-600 transition-colors drop-shadow-sm">description</span>
+                        {% if not doc.drive_file_id %}
+                            <a href="{% url 'documents:document_sync' doc.pk %}" onclick="event.stopPropagation()" class="absolute -bottom-1 -right-1 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center p-[2px] shadow-sm border border-amber-500" title="Belum tersinkronisasi. Klik untuk sinkronisasi ulang.">
+                                <span class="material-symbols-outlined text-[18px] text-amber-500 leading-none">cloud_off</span>
+                            </a>
+                        {% endif %}
                     </div>
                     <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 text-center w-full truncate mb-1" title="{{ doc.title }}">{{ doc.title }}</h3>
                     <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400">{{ doc.uploaded_at|date:"d M Y" }}</p>

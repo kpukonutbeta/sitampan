@@ -162,7 +162,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-LOGIN_REDIRECT_URL = 'documents:dashboard'
+LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'account_login'
 
 # Social Account settings

@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.core.paginator import Paginator
 import threading
 from django.contrib import messages
 from .models import Document, Category, SiteSettings
 from .forms import DocumentForm, CategoryForm, DocumentEditForm, SiteSettingsForm
-from .drive_services import delete_drive_folder, rename_drive_file
+from .drive_services import delete_drive_folder, rename_drive_file, upload_document_to_drive
 from .utils import rename_local_file
 
 from django.db.models import Q, Count
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 
 def resolve_template(request, template_name):
     # This determines if the user is in /m/... or /d/... based on current namespace
@@ -17,13 +19,31 @@ def resolve_template(request, template_name):
     if mode not in ['mobile', 'desktop']:
         mode = 'mobile'
     return f"documents/{mode}/{template_name}"
+    
+def index_redirect(request):
+    # Determine mode from cookie, default to mobile
+    mode = request.COOKIES.get('device_mode', 'mobile')
+    if mode == 'desktop':
+        return redirect('desktop:dashboard')
+    return redirect('mobile:dashboard')
 
+def toggle_mode(request):
+    current_mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    # Switch to the other mode
+    target_mode = 'desktop' if current_mode == 'mobile' else 'mobile'
+    
+    # Create response to redirect and set cookie
+    response = redirect(f'{target_mode}:dashboard')
+    response.set_cookie('device_mode', target_mode, max_age=31536000, path='/')
+    return response
+
+@login_required
 def dashboard(request):
-    # This determines if the user is in /m/... or /d/... based on current namespace
-    mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    # Determine the current namespace (mobile or desktop)
+    current_mode = getattr(request.resolver_match, 'namespace', 'mobile')
     
     # If desktop, use document_list view logic instead of the dashboard
-    if mode == 'desktop':
+    if current_mode == 'desktop':
         return document_list(request)
 
     # Fetch recent documents (Top 5)
@@ -62,6 +82,7 @@ def dashboard(request):
         'sub_categories': sub_categories,
     })
 
+@login_required
 def document_list(request):
     # If in desktop mode and accessed via the document_list URL, redirect to dashboard root (since /d/ already shows archives)
     mode = getattr(request.resolver_match, 'namespace', 'mobile')
@@ -101,15 +122,31 @@ def document_list(request):
 
     categories = Category.objects.all()
 
+    # Pagination
+    per_page = request.GET.get('per_page', 20)
+    try:
+        per_page = int(per_page)
+    except (ValueError, TypeError):
+        per_page = 20
+    
+    if per_page not in [20, 50, 100]:
+        per_page = 20
+
+    paginator = Paginator(documents, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, resolve_template(request, 'document_list.html'), {
-        'documents': documents,
+        'page_obj': page_obj,
         'categories': categories,
         'query': query,
         'category_id': category_id,
         'date_from': date_from,
         'date_to': date_to,
+        'per_page': per_page,
     })
 
+@login_required
 @staff_member_required
 def document_upload(request):
     if request.method == 'POST':
@@ -126,6 +163,8 @@ def document_upload(request):
         form = DocumentForm(initial=initial)
     return render(request, resolve_template(request, 'document_upload.html'), {'form': form})
 
+@login_required
+@staff_member_required
 def document_edit(request, pk):
     document = get_object_or_404(Document, pk=pk)
     old_title = document.title
@@ -164,6 +203,7 @@ def document_edit(request, pk):
         'next': request.GET.get('next', '')
     })
 
+@login_required
 def category_explorer(request, folder_id=None):
     current_folder = None
     breadcrumbs = []
@@ -217,6 +257,7 @@ def category_explorer(request, folder_id=None):
         'breadcrumbs': breadcrumbs,
     })
 
+@login_required
 def category_list(request):
     # Fetch all categories and annotate with document counts
     all_categories = Category.objects.annotate(doc_count=Count('documents')).order_by('name')
@@ -228,6 +269,8 @@ def category_list(request):
         'categories': sorted_categories,
     })
 
+@login_required
+@staff_member_required
 def category_add(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -246,6 +289,7 @@ def category_add(request):
         form = CategoryForm(initial=initial)
     return render(request, resolve_template(request, 'category_add.html'), {'form': form, 'next': request.GET.get('next', '')})
 
+@login_required
 @staff_member_required
 def category_edit(request, pk):
     category = get_object_or_404(Category, pk=pk)
@@ -290,6 +334,8 @@ def category_edit(request, pk):
         'next': request.GET.get('next', '')
     })
 
+@login_required
+@staff_member_required
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     
@@ -345,6 +391,7 @@ def category_delete(request, pk):
     }
     return render(request, resolve_template(request, 'category_delete.html'), context)
 
+@login_required
 @staff_member_required
 def document_delete(request, pk):
     document = get_object_or_404(Document, pk=pk)
@@ -365,6 +412,7 @@ def document_delete(request, pk):
         
     return render(request, resolve_template(request, 'document_delete.html'), {'document': document})
 
+@login_required
 @staff_member_required
 def site_settings_view(request):
     settings = SiteSettings.load()
@@ -378,3 +426,21 @@ def site_settings_view(request):
         form = SiteSettingsForm(instance=settings)
         
     return render(request, resolve_template(request, 'settings.html'), {'form': form})
+@login_required
+@staff_member_required
+def document_sync(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    
+    if not document.drive_file_id:
+        def sync_file():
+            upload_document_to_drive(document)
+        
+        threading.Thread(target=sync_file).start()
+        messages.info(request, f'Sinkronisasi ulang untuk "{document.title}" telah dimulai di latar belakang.')
+    else:
+        messages.warning(request, f'"{document.title}" sudah tersinkronisasi di Google Drive.')
+        
+    next_url = request.GET.get('next') or request.META.get('HTTP_REFERER')
+    if next_url:
+        return redirect(next_url)
+    return redirect('documents:dashboard')

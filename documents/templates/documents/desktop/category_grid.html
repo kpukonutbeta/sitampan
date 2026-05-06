@@ -33,18 +33,20 @@
             <tbody>
                 {% for cat in categories %}
                 <tr>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="me-3 p-2 bg-primary bg-opacity-10 rounded text-primary">
-                                <i class="bi bi-folder2-open"></i>
+                    <td class="p-0">
+                        <a href="{% url 'documents:category_explorer_folder' cat.id %}" class="text-decoration-none text-dark d-block p-3 category-link">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-container me-3 p-2 bg-primary bg-opacity-10 rounded text-primary">
+                                    <i class="bi bi-folder2-open"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold mb-0 cat-name">{{ cat.name }}</div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                        <i class="bi bi-diagram-3 me-1"></i>{{ cat }}
+                                    </small>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-bold mb-0">{{ cat.name }}</div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">
-                                    <i class="bi bi-diagram-3 me-1"></i>{{ cat }}
-                                </small>
-                            </div>
-                        </div>
+                        </a>
                     </td>
                     <td>
                         {% if cat.allow_document_upload %}
@@ -84,12 +86,24 @@
 </div>
 
 <style>
-    .transition-hover {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .category-link {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
     }
-    .transition-hover:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    .category-link:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+        border-left-color: var(--bs-primary);
+    }
+    .category-link:hover .cat-name {
+        color: var(--bs-primary);
+    }
+    .category-link:hover .icon-container {
+        background-color: var(--bs-primary) !important;
+        color: white !important;
+        transform: scale(1.1);
+    }
+    .icon-container {
+        transition: all 0.2s ease;
     }
 </style>
 {% endblock %}

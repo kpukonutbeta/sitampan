@@ -41,6 +41,10 @@
         .material-symbols-outlined.filled {
             font-variation-settings: 'FILL' 1;
         }
+
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-sans text-slate-900 dark:text-slate-100 min-h-screen">
@@ -48,7 +52,7 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 flex items-center bg-background-light dark:bg-background-dark/95 backdrop-blur-sm p-4 border-b border-primary/10">
         <a href="{% url 'documents:dashboard' %}" class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
-            <span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+            <span class="material-symbols-outlined text-slate-900 dark:text-slate-100 transition-colors duration-300">arrow_back</span>
         </a>
         <div class="flex items-center gap-2 ml-2 flex-1">
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="h-6 w-auto">
@@ -71,7 +75,7 @@
     <main class="flex-1 pb-32">
         <div class="px-4 space-y-3 mt-4">
             {% for cat in categories %}
-            <a href="{% url 'documents:document_list' %}?category={{ cat.id }}" class="category-item flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm active:scale-[0.98] transition-all group">
+            <a href="{% url 'documents:category_explorer_folder' cat.id %}" class="category-item flex items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50 shadow-sm active:scale-[0.98] transition-all group">
                 <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                     <span class="material-symbols-outlined text-2xl">folder</span>
                 </div>

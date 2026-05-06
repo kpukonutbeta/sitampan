@@ -45,11 +45,6 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-            color: #191c1d;
-        }
 
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -57,6 +52,10 @@
 
         .font-headline {
             font-family: 'Manrope', sans-serif;
+        }
+        
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
         .no-scrollbar::-webkit-scrollbar {
@@ -157,37 +156,110 @@
                 document.body.style.overflow = '';
             }, 500);
         }
+
+        let categorySelect;
+        document.addEventListener("DOMContentLoaded", function() {
+            const selectEl = document.getElementById("drawer_category");
+            if (selectEl) {
+                categorySelect = new TomSelect(selectEl, {
+                    create: false,
+                    placeholder: "Cari kategori...",
+                    plugins: ['dropdown_input'],
+                    maxOptions: 500,
+                });
+            }
+        });
+
+        function openFilterDrawer() {
+            const drawer = document.getElementById('filterDrawer');
+            const backdrop = document.getElementById('filterBackdrop');
+            const content = document.getElementById('drawerContent');
+
+            drawer.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                content.classList.remove('translate-y-full');
+                content.classList.add('translate-y-0');
+            }, 10);
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFilterDrawer() {
+            const backdrop = document.getElementById('filterBackdrop');
+            const content = document.getElementById('drawerContent');
+            const drawer = document.getElementById('filterDrawer');
+
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('translate-y-0');
+            content.classList.add('translate-y-full');
+
+            setTimeout(() => {
+                drawer.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 500);
+        }
+
+        function applyFilters() {
+            document.getElementById('hidden_category').value = document.getElementById('drawer_category').value;
+            document.getElementById('hidden_date_from').value = document.getElementById('drawer_date_from').value;
+            document.getElementById('hidden_date_to').value = document.getElementById('drawer_date_to').value;
+            document.getElementById('filterForm').submit();
+        }
+
+        function resetFilters() {
+            if (categorySelect) categorySelect.setValue("");
+            document.getElementById('drawer_date_from').value = "";
+            document.getElementById('drawer_date_to').value = "";
+        }
+    </script>
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     </script>
 </head>
 
 <body class="bg-background dark:bg-slate-900 min-h-screen flex flex-col font-sans">
     <!-- TopAppBar -->
     <header
-        class="sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-4 py-4 flex items-center border-b border-primary/10">
+        class="sticky top-0 z-50 bg-background/95 dark:bg-slate-900/95 backdrop-blur-sm px-4 py-4 flex items-center border-b border-slate-200 dark:border-slate-800">
         <a href="{% url 'documents:dashboard' %}"
             class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors">
-            <span class="material-symbols-outlined text-on-surface">arrow_back</span>
+            <span class="material-symbols-outlined text-on-surface dark:text-white transition-colors duration-300">arrow_back</span>
         </a>
         <div class="flex items-center gap-2 ml-2">
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="h-6 w-auto">
-            <h1 class="text-xl font-bold leading-tight tracking-tight text-on-surface">Arsip</h1>
+            <h1 class="text-xl font-bold leading-tight tracking-tight text-on-surface dark:text-white">Arsip</h1>
         </div>
     </header>
 
     <main class="flex-1 px-4 max-w-4xl mx-auto w-full pb-32">
         <!-- SearchBar -->
         <div class="mt-4 mb-6">
-            <form method="GET" action="{% url 'documents:document_list' %}">
+            <form id="filterForm" method="GET" action="{% url 'documents:document_list' %}">
                 <div
                     class="relative flex items-center bg-slate-200/50 dark:bg-white/5 rounded-ios transition-all duration-300 px-4 py-3 group">
                     <span
                         class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
                     <input name="q"
-                        class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-medium placeholder:text-slate-400 px-3"
+                        class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface dark:text-white font-medium placeholder:text-slate-400 px-3"
                         placeholder="Cari arsip..." type="text" value="{{ query }}" />
-                    {% if query %}
+                    
+                    <!-- Hidden Filters -->
+                    <input type="hidden" name="category" id="hidden_category" value="{{ category_id }}">
+                    <input type="hidden" name="date_from" id="hidden_date_from" value="{{ date_from }}">
+                    <input type="hidden" name="date_to" id="hidden_date_to" value="{{ date_to }}">
+                    <input type="hidden" name="per_page" value="{{ per_page }}">
+
+                    {% if query or category_id or date_from or date_to %}
                     <a href="{% url 'documents:document_list' %}"
-                        class="p-1 hover:bg-primary/10 rounded-full transition-colors">
+                        class="p-1 hover:bg-primary/10 rounded-full transition-colors" title="Bersihkan semua filter">
                         <span class="material-symbols-outlined text-on-surface-variant">close</span>
                     </a>
                     {% endif %}
@@ -197,34 +269,35 @@
 
         <!-- Chips / Filters -->
         <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar">
-            <button
-                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
-                Tanggal
+            <button onclick="openFilterDrawer()"
+                class="flex items-center gap-2 px-4 py-2 {% if date_from or date_to %}bg-primary text-white{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300{% endif %} rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                {% if date_from or date_to %}Tanggal Aktif{% else %}Tanggal{% endif %}
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
-            <div class="relative group">
-                <button
-                    class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                    Kategori
-                    <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
-                </button>
-            </div>
-            <button
-                class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 hover:bg-slate-50 transition-colors">
-                Jenis Berkas
+            <button onclick="openFilterDrawer()"
+                class="flex items-center gap-2 px-4 py-2 {% if category_id %}bg-primary text-white{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300{% endif %} rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-[16px]">category</span>
+                {% if category_id %}Kategori Terpilih{% else %}Kategori{% endif %}
+                <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+            </button>
+            <button onclick="openFilterDrawer()"
+                class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-[16px]">filter_list</span>
+                Lainnya
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
         </div>
 
         <!-- Section Label -->
         <div class="flex items-baseline justify-between mb-4 px-1">
-            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Hasil ({{ documents.count }})</h2>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Hasil ({{ page_obj.paginator.count }})</h2>
             <div class="text-[10px] text-slate-400 font-bold">Diurutkan berdasarkan Tanggal Unggah</div>
         </div>
 
         <!-- Search Results List -->
         <div class="space-y-3">
-            {% for doc in documents %}
+            {% for doc in page_obj %}
             <div class="bg-white dark:bg-slate-800 p-4 rounded-ios flex items-center gap-4 transition-all duration-300 ios-shadow border border-slate-50 dark:border-slate-700/30 group cursor-pointer active:scale-[0.98]"
                 onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
                 <div
@@ -234,7 +307,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
                         <h3 class="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{{ doc.title }}</h3>
-                        <span class="text-[9px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</span>
+                        <a href="{% url 'documents:category_explorer_folder' doc.category.id %}" onclick="event.stopPropagation()" class="text-[9px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</a>
                     </div>
                     <div class="flex items-center gap-3 mt-1">
                         <span class="text-slate-400 text-[10px] flex items-center gap-1">
@@ -243,7 +316,11 @@
                         </span>
                         <span class="text-slate-400 text-[10px] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">history</span>
-                            {% if doc.drive_file_id %}Tersinkronisasi{% else %}Lokal{% endif %}
+                            {% if doc.drive_file_id %}
+                                Tersinkronisasi
+                            {% else %}
+                                <a href="{% url 'documents:document_sync' doc.pk %}" onclick="event.stopPropagation()" class="text-amber-600 font-bold hover:underline">Lokal (Klik untuk Sinkronisasi)</a>
+                            {% endif %}
                         </span>
                     </div>
                 </div>
@@ -259,7 +336,93 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Mobile Pagination -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-8 mb-4 flex items-center justify-center gap-4">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}" 
+               class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 rounded-full ios-shadow border border-slate-100 dark:border-slate-700 text-primary">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </a>
+            {% else %}
+            <div class="w-10 h-10 bg-slate-100 dark:bg-slate-900/50 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-700">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </div>
+            {% endif %}
+
+            <div class="text-xs font-bold text-slate-500">
+                Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}
+            </div>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}"
+               class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 rounded-full ios-shadow border border-slate-100 dark:border-slate-700 text-primary">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </a>
+            {% else %}
+            <div class="w-10 h-10 bg-slate-100 dark:bg-slate-900/50 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-700">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
     </main>
+
+    <!-- Filter Drawer (Bottom Sheet) -->
+    <div id="filterDrawer" class="fixed inset-0 z-[110] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 opacity-0"
+            id="filterBackdrop" onclick="closeFilterDrawer()"></div>
+        
+        <!-- Drawer Content -->
+        <div class="absolute inset-x-0 bottom-0 bg-white dark:bg-background-dark rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full"
+            id="drawerContent">
+            <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mt-3 mb-1"></div>
+            
+            <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <h3 class="font-headline font-bold text-lg text-on-surface">Saring Arsip</h3>
+                <button onclick="resetFilters()" class="text-xs font-bold text-primary">Atur Ulang</button>
+            </div>
+            
+            <div class="px-6 py-6 space-y-6 overflow-y-auto max-h-[70vh]">
+                <!-- Date Range -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Rentang Tanggal</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <span class="text-[10px] text-slate-500 ml-1">Dari</span>
+                            <input type="date" id="drawer_date_from" value="{{ date_from }}"
+                                class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[10px] text-slate-500 ml-1">Sampai</span>
+                            <input type="date" id="drawer_date_to" value="{{ date_to }}"
+                                class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kategori</label>
+                    <select id="drawer_category" class="w-full">
+                        <option value="">Semua Kategori</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if category_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="px-6 py-6 pb-10 border-t border-slate-100 dark:border-slate-800">
+                <button onclick="applyFilters()"
+                    class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/30 active:scale-[0.98] transition-all">
+                    Terapkan Penyaring
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Document Preview Modal -->
     <div id="previewModal" class="fixed inset-0 z-[100] hidden">

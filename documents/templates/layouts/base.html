@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SITAMPAN Document Sync{% endblock %}</title>
+    <title>{% block title %}SITAMPAN{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
-            padding-bottom: 70px; /* Space for mobile nav */
+            padding-bottom: 70px;
+            /* Space for mobile nav */
         }
+
         @media (min-width: 768px) {
-            body { padding-bottom: 0; }
-            .mobile-nav { display: none !important; }
+            body {
+                padding-bottom: 0;
+            }
+
+            .mobile-nav {
+                display: none !important;
+            }
         }
+
         .navbar {
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
         .mobile-nav {
             position: fixed;
             bottom: 0;
@@ -32,6 +45,7 @@
             padding: 10px 0 25px 0;
             z-index: 1030;
         }
+
         .mobile-nav-item {
             display: flex;
             flex-direction: column;
@@ -41,13 +55,16 @@
             font-size: 10px;
             font-weight: 600;
         }
+
         .mobile-nav-item.active {
             color: var(--bs-primary);
         }
+
         .mobile-nav-item .material-symbols-outlined {
             font-size: 24px;
             margin-bottom: 2px;
         }
+
         .add-btn-mobile {
             width: 50px;
             height: 50px;
@@ -60,42 +77,56 @@
             margin-top: -25px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        
+
         /* Dynamic Theme Override */
         :root {
             --bs-primary: {{ site_settings.theme_color|default:'#0d6efd' }};
         }
+
         .bg-primary {
             background-color: var(--bs-primary) !important;
         }
+
         .text-primary {
             color: var(--bs-primary) !important;
         }
+
         .btn-primary {
             background-color: var(--bs-primary);
             border-color: var(--bs-primary);
         }
-        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active {
             filter: brightness(0.9);
             background-color: var(--bs-primary) !important;
             border-color: var(--bs-primary) !important;
         }
+
         .btn-outline-primary {
             color: var(--bs-primary);
             border-color: var(--bs-primary);
         }
+
         .btn-outline-primary:hover {
             background-color: var(--bs-primary);
             color: white;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'documents:dashboard' %}">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" width="30" height="30" class="me-2">
-                <span class="fw-bold">SITAMPAN</span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" width="35"
+                    height="35" class="me-2">
+                <div>
+                    <div class="fw-bold lh-1">SITAMPAN</div>
+                    <div style="font-size: 10px;" class="fw-normal opacity-75">Sistem Tata Arsip dan Penyimpanan Dokumen
+                    </div>
+                </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -103,10 +134,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'documents:dashboard' %}">Arsip</a>
+                        <a class="nav-link" href="{% url 'mobile:dashboard' %}"><i class="bi bi-phone"></i> Mode Seluler</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'mobile:dashboard' %}"><i class="bi bi-phone"></i> Mode Seluler</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                            href="{% url 'documents:dashboard' %}">Arsip</a>
                     </li>
                     {% if request.user.is_staff %}
                     <li class="nav-item">
@@ -130,6 +162,11 @@
                         <a class="nav-link" href="{% url 'account_login' %}">Masuk</a>
                     </li>
                     {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link text-primary fw-bold" href="{% url 'documents:toggle_mode' %}">
+                            <i class="bi bi-phone"></i> Mode Seluler
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -137,24 +174,26 @@
 
     <div class="container">
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
         {% endif %}
 
         {% block content %}{% endblock %}
     </div>
 
     <nav class="mobile-nav d-md-none">
-        <a href="{% url 'documents:dashboard' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <a href="{% url 'documents:dashboard' %}"
+            class="mobile-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <span class="material-symbols-outlined">grid_view</span>
             <span>Beranda</span>
         </a>
         {% if request.user.is_staff %}
-        <a href="{% url 'documents:document_list' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'document_list' %}active{% endif %}">
+        <a href="{% url 'documents:document_list' %}"
+            class="mobile-nav-item {% if request.resolver_match.url_name == 'document_list' %}active{% endif %}">
             <span class="material-symbols-outlined">folder</span>
             <span>Arsip</span>
         </a>
@@ -162,12 +201,14 @@
             <span class="material-symbols-outlined">add</span>
         </a>
         {% endif %}
-        <a href="{% url 'documents:category_list' %}" class="mobile-nav-item {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'documents:category_list' %}"
+            class="mobile-nav-item {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
             <span class="material-symbols-outlined">category</span>
             <span>Kategori</span>
         </a>
         {% if request.user.is_staff %}
-        <a href="{% url 'documents:settings' %}" class="mobile-nav-item {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'documents:settings' %}"
+            class="mobile-nav-item {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
             <span class="material-symbols-outlined">settings</span>
             <span>Pengaturan</span>
         </a>
@@ -186,5 +227,7 @@
     </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 </body>
+
 </html>

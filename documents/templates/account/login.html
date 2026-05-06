@@ -92,15 +92,19 @@
         body {
             min-height: max(884px, 100dvh);
         }
+        
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col">
+<body class="bg-surface dark:bg-slate-900 font-body text-on-surface dark:text-slate-100 antialiased min-h-screen flex flex-col">
 
     <!-- TopAppBar -->
-    <header class="h-16 flex items-center px-6 bg-surface-bright/80 backdrop-blur-md sticky top-0 z-50">
+    <header class="h-16 flex items-center px-6 bg-surface-bright/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/10">
         <div class="flex items-center gap-3 w-full max-w-7xl mx-auto">
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="h-8 w-auto">
-            <h1 class="font-headline text-lg font-semibold text-on-surface tracking-tight">SITAMPAN Document Sync</h1>
+            <h1 class="font-headline text-lg font-semibold text-on-surface dark:text-white tracking-tight">SITAMPAN</h1>
         </div>
     </header>
 
@@ -109,11 +113,11 @@
             
             <!-- Branding/Identity Section -->
             <div class="text-center mb-12">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white mb-6 cloud-shadow border border-outline-variant/15 p-3 mx-auto">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white dark:bg-slate-100 mb-6 cloud-shadow border border-outline-variant/15 p-3 mx-auto">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="w-full h-full object-contain">
                 </div>
-                <h2 class="font-headline text-[2.75rem] leading-tight font-bold text-on-surface mb-2">Selamat datang kembali</h2>
-                <p class="text-on-surface-variant font-body">Akses arsip digital dan catatan terkelola Anda.</p>
+                <h2 class="font-headline text-[2.75rem] leading-tight font-bold text-on-surface dark:text-white mb-2">Selamat datang kembali</h2>
+                <p class="text-on-surface-variant dark:text-slate-400 font-body">Sistem Tata Arsip dan Penyimpanan Dokumen</p>
             </div>
 
             <!-- Error Messages from Allauth -->
@@ -135,24 +139,24 @@
             {% endif %}
 
             <!-- Sign In Card -->
-            <div class="bg-surface-container-lowest p-10 rounded-3xl cloud-shadow border border-outline-variant/15">
+            <div class="bg-surface-container-lowest dark:bg-slate-800 p-10 rounded-3xl cloud-shadow border border-outline-variant/15 dark:border-slate-700">
                 
                 <!-- Google Login Button (Primary Action) -->
                 <form action="{% provider_login_url 'google' %}" method="post" class="w-full">
                     {% csrf_token %}
-                    <button class="w-full bg-surface-container-lowest border border-outline-variant/50 py-4 rounded-3xl flex items-center justify-center gap-3 hover:bg-surface-container-low transition-all shadow-sm" type="submit">
+                    <button class="w-full bg-surface-container-lowest dark:bg-slate-800 border border-outline-variant/50 dark:border-slate-600 py-4 rounded-3xl flex items-center justify-center gap-3 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-all shadow-sm" type="submit">
                         <img alt="Google Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCefilNI_-xN_2HU3yMsaLXHYxc7tCW8RGm_OzvSHQJr2svKEpDGVh_qKDiRMIOauZ-MjK-TXnImB8aymBNHaqsdvcUoESNXNMP9y7im6sxYpQbjwLmQpj0hJ7FhOrtG2lUqW8UX1v6-Tdn3xkD7eBGxeod98LJXNuvjTTRVx6hEAuFbpYPVRoDImyou_LL84QOQexMVS7k4fukjy5L1JYK6zULk06lcdCfleMGQD3MyFf0rZpHJH8EvBRf800A9c0wpFJsRjU47uE"/>
-                        <span class="font-semibold text-on-surface-variant">Masuk dengan Google</span>
+                        <span class="font-semibold text-on-surface-variant dark:text-slate-300">Masuk dengan Google</span>
                     </button>
                 </form>
 
                 <!-- Divider -->
                 <div class="relative py-6">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full h-px bg-surface-container-high"></div>
+                        <div class="w-full h-px bg-surface-container-high dark:bg-slate-700"></div>
                     </div>
                     <div class="relative flex justify-center">
-                        <span class="bg-surface-container-lowest px-4 text-[0.75rem] font-medium text-outline uppercase tracking-widest">atau gunakan akun lokal</span>
+                        <span class="bg-surface-container-lowest dark:bg-slate-800 px-4 text-[0.75rem] font-medium text-outline dark:text-slate-500 uppercase tracking-widest">atau gunakan akun lokal</span>
                     </div>
                 </div>
 
@@ -164,26 +168,26 @@
 
                     <!-- Input Fields -->
                     <div class="space-y-1.5">
-                        <label class="text-[0.875rem] font-medium text-on-surface-variant ml-1" for="id_login">Email atau Nama Pengguna</label>
+                        <label class="text-[0.875rem] font-medium text-on-surface-variant dark:text-slate-400 ml-1" for="id_login">Email atau Nama Pengguna</label>
                         <div class="relative">
-                            <input id="id_login" name="login" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest transition-all" placeholder="Nama Pengguna atau Email" type="text" required/>
+                            <input id="id_login" name="login" class="w-full bg-surface-container-low dark:bg-slate-700 border-none rounded-xl px-4 py-3.5 text-on-surface dark:text-white placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest dark:focus:bg-slate-600 transition-all" placeholder="Nama Pengguna atau Email" type="text" required/>
                         </div>
                     </div>
 
                     <div class="space-y-1.5">
                         <div class="flex justify-between items-center ml-1">
-                            <label class="text-[0.875rem] font-medium text-on-surface-variant" for="id_password">Kata Sandi</label>
+                            <label class="text-[0.875rem] font-medium text-on-surface-variant dark:text-slate-400" for="id_password">Kata Sandi</label>
                             <!-- Django Allauth Password Reset Link -->
                             <a class="text-[0.75rem] font-semibold text-primary hover:text-surface-tint transition-colors" href="{% url 'account_reset_password' %}">Lupa Kata Sandi?</a>
                         </div>
                         <div class="relative">
-                            <input id="id_password" name="password" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3.5 text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest transition-all" placeholder="Masukkan kata sandi Anda" type="password" required/>
+                            <input id="id_password" name="password" class="w-full bg-surface-container-low dark:bg-slate-700 border-none rounded-xl px-4 py-3.5 text-on-surface dark:text-white placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 focus:bg-surface-container-lowest dark:focus:bg-slate-600 transition-all" placeholder="Masukkan kata sandi Anda" type="password" required/>
                         </div>
                     </div>
 
                     <div class="flex items-center ml-1 mt-2">
                         <input type="checkbox" name="remember" id="id_remember" class="w-4 h-4 text-primary bg-surface-container-low border-none rounded focus:ring-primary-container/20">
-                        <label for="id_remember" class="ml-2 text-[0.875rem] text-on-surface-variant">Ingat Saya</label>
+                        <label for="id_remember" class="ml-2 text-[0.875rem] text-on-surface-variant dark:text-slate-400">Ingat Saya</label>
                     </div>
 
                     <!-- Actions -->
@@ -196,7 +200,7 @@
                 </form>
             </div>
             
-            <p class="text-center mt-10 text-on-surface-variant font-body">
+            <p class="text-center mt-10 text-on-surface-variant dark:text-slate-500 font-body">
                 Hanya admin yang berwenang yang diizinkan untuk mengakses SITAMPAN.
             </p>
         </div>
@@ -208,5 +212,26 @@
         <div class="absolute bottom-[20%] right-[-5%] w-[400px] h-[400px] rounded-full bg-tertiary-container/5 blur-[100px]"></div>
     </div>
 
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <script>
+        // Detect device mode based on screen width
+        function setDeviceMode() {
+            const isMobile = window.innerWidth < 1024; // Standard breakpoint for tablet/mobile
+            document.cookie = "device_mode=" + (isMobile ? "mobile" : "desktop") + "; path=/; max-age=31536000";
+        }
+        
+        // Run on load
+        setDeviceMode();
+        
+        // Also run on form submission to be sure
+        document.querySelector('form')?.addEventListener('submit', setDeviceMode);
+    </script>
 </body>
 </html>

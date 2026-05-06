@@ -18,14 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView
+from documents.views import index_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('m/', include(('documents.urls', 'documents'), namespace='mobile')),
     path('d/', include(('documents.urls', 'documents'), namespace='desktop')),
-    path('', RedirectView.as_view(url='/m/', permanent=False)),
+    path('', index_redirect, name='index'),
 ]
 
 if settings.DEBUG:

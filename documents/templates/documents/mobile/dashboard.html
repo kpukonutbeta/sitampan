@@ -33,6 +33,10 @@
         .material-symbols-outlined.filled {
             font-variation-settings: 'FILL' 1;
         }
+        
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -152,42 +156,32 @@
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
 
     <main class="px-5 pb-32 pt-12 max-w-lg mx-auto">
-        <header class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-3">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo" class="w-10 h-10 object-contain">
-                <div>
-                    <div class="flex items-center gap-2">
+        <header class="mb-8">
+            <div class="flex justify-between items-start">
+                <div class="flex items-center gap-3">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/KPU_Logo.svg" alt="KPU Logo"
+                        class="w-12 h-12 object-contain">
+                    <div>
                         <h1 class="text-2xl font-extrabold tracking-tight">SITAMPAN</h1>
-                        <div class="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-bold border border-emerald-500/20">
-                            <span class="material-symbols-outlined text-[10px]">sensors</span>
-                            {{ SERVER_IP }}
-                        </div>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium italic">Sistem Tata Arsip
+                            dan Penyimpanan Dokumen</p>
                     </div>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium -mt-0.5 italic">Tata Kelola Dokumen Arsip Digital</p>
                 </div>
-            </div>
-            <div class="flex items-center gap-3">
-                {% if request.user.is_staff %}
-                <a href="{% url 'desktop:dashboard' %}"
-                    class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
-                    <span class="hidden sm:inline">Desktop</span>
-                </a>
-                <a href="{% url 'documents:settings' %}"
-                    class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-lg">settings</span>
-                </a>
-                {% endif %}
-                <div class="relative">
-                    <div
-                        class="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm flex items-center justify-center bg-primary text-white">
-                        <span class="material-symbols-outlined">person</span>
-                    </div>
-                    {% if request.user.is_authenticated %}
-                    <div
-                        class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full">
-                    </div>
+
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'desktop:dashboard' %}"
+                        class="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">desktop_windows</span>
+                        <span>Mode Desktop</span>
+                    </a>
                     {% endif %}
+
+                    <div
+                        class="flex items-center gap-1 px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[9px] font-bold border border-emerald-500/20 shadow-sm">
+                        <span class="material-symbols-outlined text-[12px]">sensors</span>
+                        <span>IP: {{ SERVER_IP }}</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -209,7 +203,7 @@
             <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Kategori Tahun</h2>
             <div class="grid grid-cols-2 gap-4">
                 {% for cat in main_categories %}
-                <a href="{% url 'documents:document_list' %}?category={{ cat.id }}"
+                <a href="{% url 'documents:category_explorer_folder' cat.id %}"
                     class="{% if forloop.first %}bg-primary dark:bg-blue-600 text-white{% else %}bg-white dark:bg-slate-800 text-slate-900 dark:text-white ios-shadow border border-slate-100 dark:border-slate-700/50{% endif %} p-5 rounded-ios relative overflow-hidden group block">
                     <div
                         class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform">
@@ -217,11 +211,12 @@
                     <div class="relative z-10">
                         <div
                             class="w-10 h-10 {% if forloop.first %}bg-white/20{% else %}bg-blue-50 dark:bg-blue-900/30{% endif %} rounded-xl flex items-center justify-center mb-3">
-                            <span class="material-symbols-outlined {% if forloop.first %}text-white{% else %}text-primary{% endif %}">
+                            <span
+                                class="material-symbols-outlined {% if forloop.first %}text-white{% else %}text-primary{% endif %}">
                                 {% if forloop.first %}
-                                    move_to_inbox
+                                move_to_inbox
                                 {% else %}
-                                    outbox
+                                outbox
                                 {% endif %}
                             </span>
                         </div>
@@ -256,7 +251,7 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 {% for cat in sub_categories %}
-                <a href="{% url 'documents:document_list' %}?category={{ cat.id }}"
+                <a href="{% url 'documents:category_explorer_folder' cat.id %}"
                     class="bg-white dark:bg-slate-800 p-4 rounded-ios ios-shadow border border-slate-50 dark:border-slate-700/30 flex flex-col items-start block transition-transform active:scale-95">
                     <div
                         class="w-10 h-10 {% cycle 'bg-sky-50 dark:bg-sky-900/20' 'bg-indigo-50 dark:bg-indigo-900/20' 'bg-blue-50 dark:bg-blue-900/20' 'bg-slate-100 dark:bg-slate-700/50' %} rounded-full flex items-center justify-center mb-4">
@@ -359,8 +354,7 @@
         <div class="absolute inset-x-0 bottom-0 top-12 bg-white dark:bg-slate-900 rounded-t-[32px] shadow-2xl flex flex-col transition-transform duration-500 translate-y-full"
             id="modalContent">
             <!-- Modal Header -->
-            <div
-                class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
                 <div class="flex-1 min-w-0 mr-4 text-slate-900 dark:text-white">
                     <h3 id="previewTitle" class="font-bold truncate">Pratinjau Dokumen</h3>
                     <p id="previewSubtitle" class="text-xs text-slate-500">Ketuk untuk melihat layar penuh</p>
