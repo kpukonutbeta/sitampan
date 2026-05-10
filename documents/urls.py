@@ -17,6 +17,10 @@ urlpatterns = [
     path('<int:pk>/edit/', views.document_edit, name='document_edit'),
     path('<int:pk>/delete/', views.document_delete, name='document_delete'),
     path('<int:pk>/sync/', views.document_sync, name='document_sync'),
+    path('<int:pk>/lock/', views.document_lock, name='document_lock'),
+    path('<int:pk>/unlock/', views.document_unlock, name='document_unlock'),
+    path('<int:pk>/status/', views.document_status, name='document_status'),
+    path('<int:pk>/pdf/', views.document_serve_pdf, name='document_pdf'),
     path('settings/', views.site_settings_view, name='settings'),
     path('toggle-mode/', views.toggle_mode, name='toggle_mode'),
 ]

@@ -155,18 +155,15 @@
                     {% endif %}
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_logout' %}">Keluar</a>
+                        <a class="nav-link pe-0" href="{% url 'account_logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Keluar
+                        </a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'account_login' %}">Masuk</a>
+                        <a class="nav-link pe-0" href="{% url 'account_login' %}">Masuk</a>
                     </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link text-primary fw-bold" href="{% url 'documents:toggle_mode' %}">
-                            <i class="bi bi-phone"></i> Mode Seluler
-                        </a>
-                    </li>
                 </ul>
             </div>
         </div>

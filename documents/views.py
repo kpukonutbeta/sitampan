@@ -1,11 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, FileResponse
+import io
 from django.contrib import messages
 from django.core.paginator import Paginator
 import threading
 from django.contrib import messages
 from .models import Document, Category, SiteSettings
 from .forms import DocumentForm, CategoryForm, DocumentEditForm, SiteSettingsForm
-from .drive_services import delete_drive_folder, rename_drive_file, upload_document_to_drive
+from .drive_services import delete_drive_folder, rename_drive_file, upload_document_to_drive, update_document_in_drive
+import pikepdf
 from .utils import rename_local_file
 
 from django.db.models import Q, Count
@@ -91,17 +94,21 @@ def document_list(request):
         return redirect('desktop:dashboard')
 
     query = request.GET.get('q', '')
-    category_id = request.GET.get('category', '')
-    date_from = request.GET.get('date_from', '')
-    date_to = request.GET.get('date_to', '')
+    category_id = request.GET.get('category')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    locked_status = request.GET.get('locked')
+    per_page = request.GET.get('per_page', 20)
+    
+    try:
+        per_page = int(per_page)
+    except (ValueError, TypeError):
+        per_page = 20
 
     documents = Document.objects.all().order_by('-uploaded_at')
-    
+
     if query:
-        documents = documents.filter(
-            Q(title__icontains=query) | Q(abstract__icontains=query)
-        )
-        
+        documents = documents.filter(Q(title__icontains=query) | Q(abstract__icontains=query))
     if category_id:
         # Get the category and all its descendants
         category_ids = [category_id]
@@ -119,6 +126,12 @@ def document_list(request):
         
     if date_to:
         documents = documents.filter(uploaded_at__date__lte=date_to)
+
+    if locked_status:
+        if locked_status == '1': # Locked
+            documents = documents.filter(is_locked=True)
+        elif locked_status == '0': # Unlocked
+            documents = documents.filter(is_locked=False)
 
     categories = Category.objects.all()
 
@@ -143,16 +156,38 @@ def document_list(request):
         'category_id': category_id,
         'date_from': date_from,
         'date_to': date_to,
+        'locked_status': locked_status,
         'per_page': per_page,
+        'default_password': SiteSettings.load().default_pdf_password,
     })
 
 @login_required
 @staff_member_required
 def document_upload(request):
+    settings = SiteSettings.load()
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            document = form.save(commit=False)
+            lock_on_upload = form.cleaned_data.get('lock_on_upload')
+            password = form.cleaned_data.get('pdf_password') or settings.default_pdf_password
+            
+            # Save the document first to ensure the file is saved to disk
+            document.save()
+            
+            if lock_on_upload and password:
+                try:
+                    import pikepdf
+                    file_path = document.file.path
+                    with pikepdf.open(file_path) as pdf:
+                        pdf.save(file_path, encryption=pikepdf.Encryption(owner=password, user=password))
+                    
+                    document.is_locked = True
+                    document.encrypt_password(password)
+                    document.save(update_fields=['is_locked', 'encrypted_password'])
+                except Exception as e:
+                    messages.error(request, f'Gagal mengunci dokumen: {str(e)}')
+            
             messages.success(request, 'Dokumen berhasil diunggah! Dokumen akan disinkronkan ke Google Drive di latar belakang.')
             return redirect('documents:dashboard')
     else:
@@ -160,8 +195,13 @@ def document_upload(request):
         category_id = request.GET.get('category')
         if category_id:
             initial['category'] = category_id
+        
+        # Pre-fill default password
+        if settings.default_pdf_password:
+            initial['pdf_password'] = settings.default_pdf_password
+            
         form = DocumentForm(initial=initial)
-    return render(request, resolve_template(request, 'document_upload.html'), {'form': form})
+    return render(request, resolve_template(request, 'document_upload.html'), {'form': form, 'default_password': settings.default_pdf_password})
 
 @login_required
 @staff_member_required
@@ -432,15 +472,144 @@ def document_sync(request, pk):
     document = get_object_or_404(Document, pk=pk)
     
     if not document.drive_file_id:
-        def sync_file():
-            upload_document_to_drive(document)
-        
-        threading.Thread(target=sync_file).start()
-        messages.info(request, f'Sinkronisasi ulang untuk "{document.title}" telah dimulai di latar belakang.')
+        threading.Thread(target=upload_document_to_drive, args=(document,)).start()
+        messages.info(request, f'Sinkronisasi baru untuk "{document.title}" telah dimulai di latar belakang.')
     else:
-        messages.warning(request, f'"{document.title}" sudah tersinkronisasi di Google Drive.')
+        threading.Thread(target=update_document_in_drive, args=(document,)).start()
+        messages.info(request, f'Pembaruan file di Drive untuk "{document.title}" telah dimulai di latar belakang.')
         
     next_url = request.GET.get('next') or request.META.get('HTTP_REFERER')
     if next_url:
         return redirect(next_url)
     return redirect('documents:dashboard')
+
+@login_required
+@staff_member_required
+def document_lock(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    current_mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    
+    if request.method == 'POST':
+        password = request.POST.get('password')
+        if not password:
+            messages.error(request, 'Password tidak boleh kosong.')
+            return redirect(request.META.get('HTTP_REFERER', f'{current_mode}:dashboard'))
+            
+        try:
+            # Encrypt PDF
+            pdf_path = document.file.path
+            temp_path = pdf_path + ".tmp"
+            
+            # We use pikepdf to open and save with encryption
+            with pikepdf.open(pdf_path) as pdf:
+                encryption = pikepdf.Encryption(owner=password, user=password, allow=pikepdf.Permissions(accessibility=True))
+                pdf.save(temp_path, encryption=encryption)
+            
+            # Replace original with encrypted
+            import os
+            os.replace(temp_path, pdf_path)
+            
+            # Update database
+            document.is_locked = True
+            document.is_syncing = True
+            document.encrypt_password(password)
+            document.save(update_fields=['is_locked', 'encrypted_password', 'is_syncing'])
+            
+            # Re-upload/Update to Drive if synchronized
+            if document.drive_file_id:
+                threading.Thread(target=update_document_in_drive, args=(document,)).start()
+                
+            messages.success(request, f'Dokumen "{document.title}" berhasil dikunci dengan password.')
+        except Exception as e:
+            messages.error(request, f'Gagal mengunci dokumen: {str(e)}')
+            
+    return redirect(request.META.get('HTTP_REFERER', f'{current_mode}:dashboard'))
+
+@login_required
+@staff_member_required
+def document_unlock(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    current_mode = getattr(request.resolver_match, 'namespace', 'mobile')
+    
+    if request.method == 'POST':
+        # Retrieve password from database
+        password = document.decrypt_password()
+        
+        if not password:
+            messages.error(request, 'Password tidak ditemukan di database. Gagal membuka kunci otomatis.')
+            return redirect(request.META.get('HTTP_REFERER', f'{current_mode}:dashboard'))
+            
+        try:
+            pdf_path = document.file.path
+            temp_path = pdf_path + ".unlocked.tmp"
+            
+            # Try to open with the stored password
+            try:
+                import pikepdf
+                with pikepdf.open(pdf_path, password=password) as pdf:
+                    pdf.save(temp_path)
+            except pikepdf.PasswordError:
+                messages.error(request, 'Password yang tersimpan salah. Gagal membuka kunci dokumen.')
+                return redirect(request.META.get('HTTP_REFERER', f'{current_mode}:dashboard'))
+            
+            # Replace original with unlocked version
+            import os
+            os.replace(temp_path, pdf_path)
+            
+            # Update database
+            document.is_locked = False
+            document.is_syncing = True
+            document.encrypted_password = None
+            document.save(update_fields=['is_locked', 'encrypted_password', 'is_syncing'])
+            
+            # Update on Drive
+            if document.drive_file_id:
+                threading.Thread(target=update_document_in_drive, args=(document,)).start()
+                
+            messages.success(request, f'Kunci dokumen "{document.title}" telah dibuka secara otomatis.')
+        except Exception as e:
+            messages.error(request, f'Gagal membuka kunci dokumen: {str(e)}')
+            
+    return redirect(request.META.get('HTTP_REFERER', f'{current_mode}:dashboard'))
+
+@login_required
+def document_status(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    return JsonResponse({
+        'id': document.id,
+        'is_locked': document.is_locked,
+        'is_syncing': document.is_syncing,
+        'drive_file_id': document.drive_file_id,
+    })
+
+@login_required
+def document_serve_pdf(request, pk):
+    """
+    Serves the PDF file. If it's locked, decrypts it on-the-fly for preview
+    using the stored password, so the user doesn't have to enter it.
+    """
+    document = get_object_or_404(Document, pk=pk)
+    
+    if not document.file:
+        return redirect('documents:dashboard')
+        
+    file_path = document.file.path
+    
+    if document.is_locked:
+        password = document.decrypt_password()
+        if password:
+            try:
+                import pikepdf
+                # Open the encrypted PDF and save it to an in-memory buffer
+                buffer = io.BytesIO()
+                with pikepdf.open(file_path, password=password) as pdf:
+                    pdf.save(buffer)
+                buffer.seek(0)
+                return FileResponse(buffer, content_type='application/pdf')
+            except Exception as e:
+                print(f"Error decrypting for preview: {e}")
+                # Fallback to serving the encrypted file (user will see password prompt)
+                return FileResponse(open(file_path, 'rb'), content_type='application/pdf')
+    
+    # Not locked or no password stored, serve normally
+    return FileResponse(open(file_path, 'rb'), content_type='application/pdf')

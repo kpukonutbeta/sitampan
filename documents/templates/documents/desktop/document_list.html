@@ -19,12 +19,12 @@
 <div class="card mb-4 shadow-sm">
     <div class="card-body">
         <form method="GET" action="{% url 'documents:dashboard' %}" class="row g-3 align-items-end">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="q" class="form-label text-muted small mb-1">Kata Kunci</label>
-                <input type="text" name="q" id="q" class="form-control" placeholder="Cari berdasarkan judul atau abstrak..." value="{{ query }}">
+                <input type="text" name="q" id="q" class="form-control" placeholder="Cari..." value="{{ query }}">
             </div>
             
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="category" class="form-label text-muted small mb-1">Kategori</label>
                 <select name="category" id="category" class="form-select">
                     <option value="">Semua Kategori</option>
@@ -45,12 +45,21 @@
                 <label for="date_to" class="form-label text-muted small mb-1">Sampai Tanggal</label>
                 <input type="date" name="date_to" id="date_to" class="form-control" value="{{ date_to }}">
             </div>
+            
+            <div class="col-md-2">
+                <label for="locked" class="form-label text-muted small mb-1">Status Keamanan</label>
+                <select name="locked" id="locked" class="form-select">
+                    <option value="">Semua</option>
+                    <option value="1" {% if locked_status == "1" %}selected{% endif %}>Terkunci</option>
+                    <option value="0" {% if locked_status == "0" %}selected{% endif %}>Terbuka</option>
+                </select>
+            </div>
 
             <div class="col-md-1">
                 <button type="submit" class="btn btn-outline-secondary w-100">Saring</button>
             </div>
             
-            {% if query or category_id or date_from or date_to %}
+            {% if query or category_id or date_from or date_to or locked_status %}
             <div class="col-12 mt-2">
                 <a href="{% url 'documents:dashboard' %}" class="btn btn-sm btn-link text-decoration-none px-0">Hapus Penyaring</a>
             </div>
@@ -147,15 +156,17 @@
                             <span class="text-muted fst-italic">-</span>
                         {% endif %}
                     </td>
-                    <td class="cursor-pointer" onclick="document.getElementById('row-preview-btn-{{ doc.pk }}').click()" style="cursor: pointer;">{{ doc.category.name }}</td>
+                    <td class="cursor-pointer" onclick="document.getElementById('row-preview-btn-{{ doc.pk }}').click()" style="cursor: pointer;" data-bs-toggle="tooltip" data-bs-title="{{ doc.category }}">
+                        {{ doc.category.name }}
+                    </td>
                     <td class="cursor-pointer" onclick="document.getElementById('row-preview-btn-{{ doc.pk }}').click()" style="cursor: pointer;">{{ doc.uploaded_at|date:"M d, Y H:i" }}</td>
-                    <td>
-                        {% if doc.drive_file_id %}
-                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Tersinkronisasi</span>
-                        {% else %}
+                    <td id="sync-status-{{ doc.pk }}">
+                        {% if doc.is_syncing or not doc.drive_file_id %}
                             <a href="{% url 'documents:document_sync' doc.pk %}" class="badge bg-warning text-dark text-decoration-none" title="Klik untuk sinkronisasi ulang">
                                 <i class="bi bi-arrow-repeat"></i> Tertunda/Gagal
                             </a>
+                        {% else %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Tersinkronisasi</span>
                         {% endif %}
                     </td>
                     <td class="text-nowrap">
@@ -165,6 +176,11 @@
                         <a href="{% url 'documents:document_edit' doc.pk %}" class="btn btn-sm btn-outline-warning">
                             <i class="bi bi-pencil"></i> Ubah
                         </a>
+                        {% if request.user.is_staff %}
+                        <button type="button" class="btn btn-sm {% if doc.is_locked %}btn-success{% else %}btn-outline-secondary{% endif %}" data-bs-toggle="modal" data-bs-target="#{% if doc.is_locked %}unlockModal{% else %}lockModal{% endif %}{{ doc.pk }}">
+                            <i class="bi {% if doc.is_locked %}bi-lock-fill{% else %}bi-unlock{% endif %}"></i>
+                        </button>
+                        {% endif %}
 
                         <!-- Preview Modal -->
                         <div class="modal fade" id="previewModal{{ doc.pk }}" tabindex="-1" aria-labelledby="previewModalLabel{{ doc.pk }}" aria-hidden="true">
@@ -178,7 +194,7 @@
                                     </div>
                                     <div class="modal-body p-0">
                                         {% if doc.file %}
-                                            <iframe src="{{ doc.file.url }}" width="100%" height="700px" style="border: none;"></iframe>
+                                            <iframe src="{% url 'documents:document_pdf' doc.pk %}" width="100%" height="700px" style="border: none;"></iframe>
                                         {% else %}
                                             <div class="p-5 text-center text-muted">
                                                 <i class="bi bi-exclamation-triangle fs-1"></i>
@@ -189,6 +205,59 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="lockModal{{ doc.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <form onsubmit="submitSecurityAction(event, '{{ doc.pk }}', 'lock')">
+                                        {% csrf_token %}
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title"><i class="bi bi-lock"></i> Kunci Dokumen PDF</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="small text-muted mb-4 text-wrap text-break">Masukkan password untuk mengunci file PDF ini. Setelah dikunci, siapa pun yang membuka file ini (di Drive atau Lokal) akan diminta password.</p>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Setel Password</label>
+                                                <input type="password" name="password" class="form-control password-field" 
+                                                    value="{{ default_password|default:'' }}"
+                                                    data-default="{{ default_password|default:'' }}"
+                                                    placeholder="Ketik password keamanan..." required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-dark">Kunci PDF</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unlock Modal -->
+                        <div class="modal fade" id="unlockModal{{ doc.pk }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <form onsubmit="submitSecurityAction(event, '{{ doc.pk }}', 'unlock')">
+                                        {% csrf_token %}
+                                        <div class="modal-header bg-success text-white">
+                                            <h5 class="modal-title"><i class="bi bi-unlock"></i> Buka Kunci Dokumen</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body text-center py-4">
+                                            <div class="mb-3 text-success">
+                                                <i class="bi bi-unlock-fill fs-1"></i>
+                                            </div>
+                                            <p class="mb-0 text-wrap text-break">Dokumen ini sedang terkunci. Sistem akan membuka kunci secara otomatis menggunakan password yang tersimpan di database.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-success text-white">Buka Kunci Otomatis</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -278,6 +347,10 @@ function updatePerPage(val) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
     const categorySelect = document.getElementById("category");
     if (categorySelect) {
         new TomSelect(categorySelect, {
@@ -291,6 +364,99 @@ document.addEventListener("DOMContentLoaded", function() {
             maxOptions: 500,
         });
     }
+});
+
+// Real-time status polling for syncing documents
+const syncingDocs = [{% for doc in documents %}{% if doc.is_syncing %}{{ doc.pk }},{% endif %}{% endfor %}];
+const activeIntervals = {};
+
+async function submitSecurityAction(event, pk, action) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const modalId = (action === 'lock' ? 'lockModal' : 'unlockModal') + pk;
+    const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+    
+    try {
+        const response = await fetch(`/d/${pk}/${action}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        });
+        
+        if (response.ok || response.status === 302) {
+            modal.hide();
+            // Update UI to "Tertunda/Gagal" immediately
+            const statusCell = document.getElementById(`sync-status-${pk}`);
+            if (statusCell) {
+                statusCell.innerHTML = `<a href="/d/${pk}/sync/" class="badge bg-warning text-dark text-decoration-none" title="Klik untuk sinkronisasi ulang"><i class="bi bi-arrow-repeat"></i> Tertunda/Gagal</a>`;
+            }
+            // Update lock button icon temporarily
+            const lockBtn = document.querySelector(`[data-bs-target="#${modalId}"]`);
+            if (lockBtn) {
+                const icon = lockBtn.querySelector('i');
+                if (action === 'lock') {
+                    lockBtn.classList.replace('btn-outline-secondary', 'btn-success');
+                    icon.classList.replace('bi-unlock', 'bi-lock-fill');
+                    lockBtn.setAttribute('data-bs-target', `#unlockModal${pk}`);
+                } else {
+                    lockBtn.classList.replace('btn-success', 'btn-outline-secondary');
+                    icon.classList.replace('bi-lock-fill', 'bi-unlock');
+                    lockBtn.setAttribute('data-bs-target', `#lockModal${pk}`);
+                }
+            }
+            // Start polling
+            pollSyncStatus(pk);
+        } else {
+            alert('Terjadi kesalahan saat memproses permintaan.');
+        }
+    } catch (error) {
+        console.error('Error submitting action:', error);
+    }
+}
+
+function pollSyncStatus(pk) {
+    if (activeIntervals[pk]) return;
+    
+    activeIntervals[pk] = setInterval(async () => {
+        try {
+            const response = await fetch(`/d/${pk}/status/`);
+            const data = await response.json();
+            
+            if (!data.is_syncing) {
+                clearInterval(activeIntervals[pk]);
+                delete activeIntervals[pk];
+                
+                const statusCell = document.getElementById(`sync-status-${pk}`);
+                if (statusCell) {
+                    if (data.drive_file_id) {
+                        statusCell.innerHTML = `<span class="badge bg-success"><i class="bi bi-check-circle"></i> Tersinkronisasi</span>`;
+                    } else {
+                        statusCell.innerHTML = `<a href="/d/${pk}/sync/" class="badge bg-warning text-dark text-decoration-none" title="Klik untuk sinkronisasi ulang"><i class="bi bi-arrow-repeat"></i> Tertunda/Gagal</a>`;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error polling status:', error);
+        }
+    }, 2000);
+}
+
+syncingDocs.forEach(pk => pollSyncStatus(pk));
+
+// Default password backspace behavior
+document.querySelectorAll('.password-field').forEach(input => {
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace') {
+            const defaultValue = this.getAttribute('data-default');
+            if (this.value === defaultValue) {
+                this.value = '';
+                e.preventDefault();
+            }
+        }
+    });
 });
 </script>
 {% endblock %}

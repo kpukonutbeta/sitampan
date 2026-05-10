@@ -38,6 +38,9 @@ class DocumentForm(forms.ModelForm):
             'file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
         }
 
+    lock_on_upload = forms.BooleanField(required=False, label="Kunci Dokumen", widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    pdf_password = forms.CharField(required=False, label="Password PDF", widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Biarkan kosong untuk menggunakan password default'}))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.filter(allow_document_upload=True)
@@ -55,7 +58,20 @@ class SiteSettingsForm(forms.ModelForm):
     class Meta:
         from .models import SiteSettings
         model = SiteSettings
-        fields = ['theme_color']
+        fields = ['theme_color', 'default_pdf_password']
         widgets = {
-            'theme_color': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'title': 'Pilih Warna Tema'})
+            'theme_color': forms.TextInput(attrs={'type': 'color', 'class': 'form-control form-control-color', 'title': 'Pilih Warna Tema'}),
+            'default_pdf_password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password default untuk mengunci PDF'}),
         }
+
+    confirm_password = forms.CharField(required=False, label="Konfirmasi Password", widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ketik ulang password default'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('default_pdf_password')
+        confirm = cleaned_data.get('confirm_password')
+
+        if password and password != confirm:
+            self.add_error('confirm_password', "Password konfirmasi tidak cocok.")
+        
+        return cleaned_data

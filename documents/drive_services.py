@@ -6,6 +6,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from django.conf import settings
 from google.auth import exceptions
+from datetime import datetime
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
@@ -124,7 +125,7 @@ def upload_document_to_drive(document):
     }
     
     file_path = document.file.path
-    media = MediaFileUpload(file_path, resumable=True)
+    media = MediaFileUpload(file_path, mimetype='application/pdf', resumable=True)
     
     file = service.files().create(
         body=file_metadata, 
@@ -183,3 +184,41 @@ def rename_drive_file(file_id, new_name):
     except Exception as e:
         print(f"Error renaming Drive file {file_id}: {e}")
         return False
+
+def update_document_in_drive(document):
+    """
+    Updates the content of an existing file in Google Drive.
+    If the file doesn't exist in Drive yet, it uploads it.
+    """
+    if not document.drive_file_id:
+        return upload_document_to_drive(document)
+        
+    service = get_drive_service()
+    if not service:
+        return None
+        
+    try:
+        file_path = document.file.path
+        media = MediaFileUpload(file_path, mimetype='application/pdf', resumable=True)
+        
+        file = service.files().update(
+            fileId=document.drive_file_id,
+            media_body=media,
+            fields='id',
+            supportsAllDrives=True
+        ).execute()
+        
+        # Log success
+        with open('drive_sync.log', 'a') as f:
+            f.write(f"Updated {document.title} (ID: {document.drive_file_id}) at {datetime.now()}\n")
+            
+        document.is_syncing = False
+        document.save(update_fields=['is_syncing'])
+        return file.get('id')
+    except Exception as e:
+        with open('drive_sync.log', 'a') as f:
+            f.write(f"FAILED to update {document.title} (ID: {document.drive_file_id}) at {datetime.now()}: {str(e)}\n")
+        print(f"Error updating Drive file {document.drive_file_id}: {e}")
+        document.is_syncing = False
+        document.save(update_fields=['is_locked', 'is_syncing']) # Also save is_locked in case it needs sync
+        return None

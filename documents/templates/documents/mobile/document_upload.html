@@ -132,7 +132,6 @@
                 {% endif %}
             </div>
 
-            <!-- File Upload Area -->
             <div class="space-y-2">
                 <label class="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Pilih Berkas</label>
                 <div id="drop-area" class="relative group">
@@ -150,6 +149,29 @@
                 {% if form.file.errors %}
                     <p class="text-red-500 text-xs ml-1">{{ form.file.errors|join:", " }}</p>
                 {% endif %}
+            </div>
+
+            <!-- Security Options -->
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl space-y-4 ios-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-sm">Keamanan PDF</h3>
+                        <p class="text-[10px] text-slate-500">Kunci dokumen saat diunggah</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="lock_on_upload" id="lock_on_upload" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+                
+                <div id="password-section" class="hidden space-y-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <label for="pdf_password" class="text-xs font-bold text-slate-500 ml-1">Password Keamanan</label>
+                    <input type="password" name="pdf_password" id="pdf_password"
+                        value="{{ default_password|default:'' }}"
+                        data-default="{{ default_password|default:'' }}"
+                        placeholder="Masukkan password..."
+                        class="w-full bg-white dark:bg-slate-800 border-none rounded-2xl py-4 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 transition-all password-field">
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -187,6 +209,32 @@
                     fileNameDisplay.textContent = this.files[0].name;
                     fileNameDisplay.classList.add("text-primary");
                 }
+            });
+
+            // Toggle password field
+            const lockToggle = document.getElementById("lock_on_upload");
+            const passSection = document.getElementById("password-section");
+            if (lockToggle) {
+                lockToggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        passSection.classList.remove('hidden');
+                    } else {
+                        passSection.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Default password backspace behavior
+            document.querySelectorAll('.password-field').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace') {
+                        const defaultValue = this.getAttribute('data-default');
+                        if (this.value === defaultValue) {
+                            this.value = '';
+                            e.preventDefault();
+                        }
+                    }
+                });
             });
         });
     </script>

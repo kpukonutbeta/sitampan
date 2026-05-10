@@ -3,6 +3,7 @@ from django.core.validators import FileExtensionValidator
 import os
 class SiteSettings(models.Model):
     theme_color = models.CharField(max_length=50, default="#2563eb", help_text="Hex color code for primary theme")
+    default_pdf_password = models.CharField(max_length=255, blank=True, null=True, help_text="Default password for locking PDFs")
     
     def save(self, *args, **kwargs):
         self.pk = 1
@@ -62,7 +63,30 @@ class Document(models.Model):
     file = models.FileField(upload_to=document_upload_path, validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='documents')
     drive_file_id = models.CharField(max_length=255, null=True, blank=True, help_text="Google Drive File ID")
+    is_locked = models.BooleanField(default=False, help_text="Whether the PDF is password protected")
+    is_syncing = models.BooleanField(default=False, help_text="Whether the document is currently syncing with Drive")
+    encrypted_password = models.TextField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def encrypt_password(self, password):
+        from cryptography.fernet import Fernet
+        import os
+        key = os.getenv('DOCUMENT_PASSWORD_KEY')
+        if not key:
+            raise ValueError("DOCUMENT_PASSWORD_KEY not set in environment")
+        f = Fernet(key.encode())
+        self.encrypted_password = f.encrypt(password.encode()).decode()
+
+    def decrypt_password(self):
+        from cryptography.fernet import Fernet
+        import os
+        if not self.encrypted_password:
+            return None
+        key = os.getenv('DOCUMENT_PASSWORD_KEY')
+        if not key:
+            raise ValueError("DOCUMENT_PASSWORD_KEY not set in environment")
+        f = Fernet(key.encode())
+        return f.decrypt(self.encrypted_password.encode()).decode()
 
     def __str__(self):
         return self.title

@@ -24,6 +24,23 @@
                         {% endif %}
                     </div>
 
+                    <div class="mb-4">
+                        <label for="{{ form.default_pdf_password.id_for_label }}" class="form-label fw-bold">Password PDF Default</label>
+                        {{ form.default_pdf_password }}
+                        <div class="form-text text-muted">Password ini akan otomatis terisi saat Anda mengunci atau mengunggah dokumen baru.</div>
+                        {% if form.default_pdf_password.errors %}
+                            <div class="text-danger small mt-1">{{ form.default_pdf_password.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.confirm_password.id_for_label }}" class="form-label fw-bold">Konfirmasi Password Default</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}
+                            <div class="text-danger small mt-1">{{ form.confirm_password.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="{% url 'documents:dashboard' %}" class="btn btn-outline-secondary">Batal</a>
                         <button type="submit" class="btn btn-primary">

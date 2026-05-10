@@ -67,7 +67,101 @@
             scrollbar-width: none;
         }
     </style>
+    <!-- PDF Lock Modal -->
+    <div id="lockModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeLockModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 rounded-t-[32px] p-8 ios-shadow transform transition-transform duration-300 translate-y-full" id="lockDrawer">
+            <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-8"></div>
+            
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-900 dark:text-white">
+                    <span class="material-symbols-outlined">lock</span>
+                </div>
+                <div>
+                    <h3 id="lockModalHeader" class="font-headline font-extrabold text-xl text-slate-900 dark:text-white">Kunci Dokumen</h3>
+                    <p id="lockDocTitle" class="text-sm text-slate-500 dark:text-slate-400 truncate w-64">Judul Dokumen</p>
+                </div>
+            </div>
+
+            <form id="lockForm" onsubmit="submitMobileSecurityAction(event)">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div id="passwordInputContainer">
+                        <label id="lockLabel" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Setel Password PDF</label>
+                        <input type="password" name="password" id="lockPasswordInput"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-4 px-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 transition-all password-field"
+                            value="{{ default_password|default:'' }}"
+                            data-default="{{ default_password|default:'' }}"
+                            placeholder="Masukkan password...">
+                    </div>
+                    
+                    <div id="lockWarning" class="hidden p-4 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-900/30">
+                        <div class="flex gap-3">
+                            <span class="material-symbols-outlined text-amber-600">info</span>
+                            <p id="lockWarningText" class="text-xs text-amber-800 dark:text-amber-400 leading-relaxed">
+                                Dokumen ini sedang terkunci. Sistem akan membuka kunci secara otomatis menggunakan password yang tersimpan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex gap-3">
+                        <button type="button" onclick="closeLockModal()" class="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold active:scale-95 transition-all">Batal</button>
+                        <button type="submit" id="lockSubmitBtn" class="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold active:scale-95 transition-all">Kunci PDF</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        function openLockModal(pk, title, isLocked) {
+            const modal = document.getElementById('lockModal');
+            const drawer = document.getElementById('lockDrawer');
+            const form = document.getElementById('lockForm');
+            const header = document.getElementById('lockModalHeader');
+            const label = document.getElementById('lockLabel');
+            const submitBtn = document.getElementById('lockSubmitBtn');
+            const titleElem = document.getElementById('lockDocTitle');
+            const warning = document.getElementById('lockWarning');
+            
+            titleElem.textContent = title;
+            
+            if (isLocked) {
+                form.action = `/m/${pk}/unlock/`;
+                header.textContent = "Buka Kunci Dokumen";
+                document.getElementById('passwordInputContainer').classList.add('hidden');
+                document.getElementById('lockPasswordInput').required = false;
+                submitBtn.textContent = "Buka Kunci Otomatis";
+                submitBtn.classList.remove('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+                submitBtn.classList.add('bg-green-600', 'text-white');
+                warning.classList.remove('hidden');
+            } else {
+                form.action = `/m/${pk}/lock/`;
+                header.textContent = "Kunci Dokumen";
+                document.getElementById('passwordInputContainer').classList.remove('hidden');
+                document.getElementById('lockPasswordInput').required = true;
+                submitBtn.textContent = "Kunci PDF";
+                submitBtn.classList.add('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+                submitBtn.classList.remove('bg-green-600', 'text-white');
+                warning.classList.add('hidden');
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                drawer.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeLockModal() {
+            const drawer = document.getElementById('lockDrawer');
+            const modal = document.getElementById('lockModal');
+            
+            drawer.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
         function openPreview(url, title, fileName, driveUrl, folderUrl) {
             const modal = document.getElementById('previewModal');
             const backdrop = document.getElementById('modalBackdrop');
@@ -202,17 +296,45 @@
             }, 500);
         }
 
+        function setLockedFilter(val) {
+            document.getElementById('drawer_locked').value = val;
+            // Update UI buttons
+            ['all', '1', '0'].forEach(v => {
+                const btn = document.getElementById('btn_locked_' + (v || 'all'));
+                if (v === val) {
+                    btn.classList.add('bg-primary/10', 'border-primary', 'text-primary');
+                    btn.classList.remove('bg-slate-50', 'dark:bg-slate-800', 'border-slate-100', 'dark:border-slate-700', 'text-slate-500');
+                } else {
+                    btn.classList.remove('bg-primary/10', 'border-primary', 'text-primary');
+                    btn.classList.add('bg-slate-50', 'dark:bg-slate-800', 'border-slate-100', 'dark:border-slate-700', 'text-slate-500');
+                }
+            });
+        }
+
         function applyFilters() {
-            document.getElementById('hidden_category').value = document.getElementById('drawer_category').value;
-            document.getElementById('hidden_date_from').value = document.getElementById('drawer_date_from').value;
-            document.getElementById('hidden_date_to').value = document.getElementById('drawer_date_to').value;
-            document.getElementById('filterForm').submit();
+            const dateFrom = document.getElementById('drawer_date_from').value;
+            const dateTo = document.getElementById('drawer_date_to').value;
+            const category = document.getElementById('drawer_category').value;
+            const locked = document.getElementById('drawer_locked').value;
+
+            const url = new URL(window.location.href);
+            if (dateFrom) url.searchParams.set('date_from', dateFrom); else url.searchParams.delete('date_from');
+            if (dateTo) url.searchParams.set('date_to', dateTo); else url.searchParams.delete('date_to');
+            if (category) url.searchParams.set('category', category); else url.searchParams.delete('category');
+            if (locked) url.searchParams.set('locked', locked); else url.searchParams.delete('locked');
+            url.searchParams.set('page', 1);
+
+            window.location.href = url.toString();
         }
 
         function resetFilters() {
-            if (categorySelect) categorySelect.setValue("");
-            document.getElementById('drawer_date_from').value = "";
-            document.getElementById('drawer_date_to').value = "";
+            const url = new URL(window.location.href);
+            url.searchParams.delete('date_from');
+            url.searchParams.delete('date_to');
+            url.searchParams.delete('category');
+            url.searchParams.delete('locked');
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
         }
     </script>
     <script>
@@ -255,6 +377,7 @@
                     <input type="hidden" name="category" id="hidden_category" value="{{ category_id }}">
                     <input type="hidden" name="date_from" id="hidden_date_from" value="{{ date_from }}">
                     <input type="hidden" name="date_to" id="hidden_date_to" value="{{ date_to }}">
+                    <input type="hidden" name="locked" id="hidden_locked" value="{{ locked_status }}">
                     <input type="hidden" name="per_page" value="{{ per_page }}">
 
                     {% if query or category_id or date_from or date_to %}
@@ -282,6 +405,12 @@
                 <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
             </button>
             <button onclick="openFilterDrawer()"
+                class="flex items-center gap-2 px-4 py-2 {% if locked_status %}bg-primary text-white{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300{% endif %} rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-[16px]">{% if locked_status == '1' %}lock{% elif locked_status == '0' %}lock_open{% else %}security{% endif %}</span>
+                {% if locked_status == '1' %}Terkunci{% elif locked_status == '0' %}Terbuka{% else %}Status{% endif %}
+                <span class="material-symbols-outlined text-[16px]">keyboard_arrow_down</span>
+            </button>
+            <button onclick="openFilterDrawer()"
                 class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold whitespace-nowrap ios-shadow border border-slate-100 dark:border-slate-700 active:scale-95 transition-all">
                 <span class="material-symbols-outlined text-[16px]">filter_list</span>
                 Lainnya
@@ -299,7 +428,7 @@
         <div class="space-y-3">
             {% for doc in page_obj %}
             <div class="bg-white dark:bg-slate-800 p-4 rounded-ios flex items-center gap-4 transition-all duration-300 ios-shadow border border-slate-50 dark:border-slate-700/30 group cursor-pointer active:scale-[0.98]"
-                onclick="openPreview('{{ doc.file.url }}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
+                onclick="openPreview('{% url 'documents:document_pdf' doc.pk %}', '{{ doc.title|escapejs }}', '{{ doc.file.name|lower }}', '{% if doc.drive_file_id %}https://drive.google.com/open?id={{ doc.drive_file_id }}{% endif %}', '{% if doc.category.drive_folder_id %}https://drive.google.com/open?id={{ doc.category.drive_folder_id }}{% endif %}')">
                 <div
                     class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                     <span class="material-symbols-outlined text-2xl">{% if doc.file.name|lower|slice:"-3:" == "pdf" %}description{% else %}article{% endif %}</span>
@@ -307,19 +436,26 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start">
                         <h3 class="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">{{ doc.title }}</h3>
-                        <a href="{% url 'documents:category_explorer_folder' doc.category.id %}" onclick="event.stopPropagation()" class="text-[9px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</a>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'documents:category_explorer_folder' doc.category.id %}" onclick="event.stopPropagation()" class="text-[9px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full whitespace-nowrap uppercase">{{ doc.category.name }}</a>
+                            {% if request.user.is_staff %}
+                            <button onclick="event.stopPropagation(); openLockModal('{{ doc.pk }}', '{{ doc.title|escapejs }}', {{ doc.is_locked|yesno:'true,false' }})" class="p-1 rounded-full {% if doc.is_locked %}bg-success/10 text-success{% else %}bg-slate-100 dark:bg-slate-700 text-slate-400{% endif %} active:scale-90 transition-transform">
+                                <span class="material-symbols-outlined text-[16px]">{% if doc.is_locked %}lock{% else %}lock_open{% endif %}</span>
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="flex items-center gap-3 mt-1">
                         <span class="text-slate-400 text-[10px] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">calendar_today</span>
                             {{ doc.uploaded_at|date:"M d, Y" }}
                         </span>
-                        <span class="text-slate-400 text-[10px] flex items-center gap-1">
+                        <span id="sync-status-{{ doc.pk }}" class="text-slate-400 text-[10px] flex items-center gap-1">
                             <span class="material-symbols-outlined text-[12px]">history</span>
-                            {% if doc.drive_file_id %}
-                                Tersinkronisasi
-                            {% else %}
+                            {% if doc.is_syncing or not doc.drive_file_id %}
                                 <a href="{% url 'documents:document_sync' doc.pk %}" onclick="event.stopPropagation()" class="text-amber-600 font-bold hover:underline">Lokal (Klik untuk Sinkronisasi)</a>
+                            {% else %}
+                                Tersinkronisasi
                             {% endif %}
                         </span>
                     </div>
@@ -412,6 +548,17 @@
                         <option value="{{ cat.id }}" {% if category_id == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat }}</option>
                         {% endfor %}
                     </select>
+                </div>
+
+                <!-- Security Status -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status Keamanan</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="setLockedFilter('')" id="btn_locked_all" class="py-3 px-2 rounded-xl border text-[10px] font-bold transition-all {% if not locked_status %}bg-primary/10 border-primary text-primary{% else %}bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500{% endif %}">Semua</button>
+                        <button onclick="setLockedFilter('1')" id="btn_locked_1" class="py-3 px-2 rounded-xl border text-[10px] font-bold transition-all {% if locked_status == '1' %}bg-primary/10 border-primary text-primary{% else %}bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500{% endif %}">Terkunci</button>
+                        <button onclick="setLockedFilter('0')" id="btn_locked_0" class="py-3 px-2 rounded-xl border text-[10px] font-bold transition-all {% if locked_status == '0' %}bg-primary/10 border-primary text-primary{% else %}bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500{% endif %}">Terbuka</button>
+                    </div>
+                    <input type="hidden" id="drawer_locked" value="{{ locked_status }}">
                 </div>
             </div>
             
@@ -519,6 +666,135 @@
         </a>
         {% endif %}
     </nav>
+    <script>
+        // Real-time status polling for syncing documents
+        const syncingDocs = [{% for doc in documents %}{% if doc.is_syncing %}{{ doc.pk }},{% endif %}{% endfor %}];
+        const activeIntervals = {};
+        let currentActionPk = null;
+
+        async function submitMobileSecurityAction(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const pk = currentActionPk;
+            const url = form.getAttribute('action');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                });
+                
+                if (response.ok || response.status === 302) {
+                    closeLockModal();
+                    // Update UI immediately
+                    const statusCell = document.getElementById(`sync-status-${pk}`);
+                    if (statusCell) {
+                        statusCell.innerHTML = `
+                            <span class="material-symbols-outlined text-[12px]">history</span>
+                            <a href="/m/${pk}/sync/" onclick="event.stopPropagation()" class="text-amber-600 font-bold hover:underline">Lokal (Klik untuk Sinkronisasi)</a>
+                        `;
+                    }
+                    // Start polling
+                    pollSyncStatus(pk);
+                } else {
+                    alert('Terjadi kesalahan saat memproses permintaan.');
+                }
+            } catch (error) {
+                console.error('Error submitting action:', error);
+            }
+        }
+
+        function openLockModal(pk, title, isLocked) {
+            currentActionPk = pk;
+            const modal = document.getElementById('lockModal');
+            const drawer = document.getElementById('lockDrawer');
+            const form = document.getElementById('lockForm');
+            const header = document.getElementById('lockModalHeader');
+            const label = document.getElementById('lockLabel');
+            const submitBtn = document.getElementById('lockSubmitBtn');
+            const titleElem = document.getElementById('lockDocTitle');
+            const warning = document.getElementById('lockWarning');
+            
+            titleElem.textContent = title;
+            
+            if (isLocked) {
+                form.setAttribute('action', `/m/${pk}/unlock/`);
+                header.textContent = "Buka Kunci Dokumen";
+                document.getElementById('passwordInputContainer').classList.add('hidden');
+                document.getElementById('lockPasswordInput').required = false;
+                submitBtn.textContent = "Buka Kunci Otomatis";
+                submitBtn.classList.remove('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+                submitBtn.classList.add('bg-green-600', 'text-white');
+                warning.classList.remove('hidden');
+            } else {
+                form.setAttribute('action', `/m/${pk}/lock/`);
+                header.textContent = "Kunci Dokumen";
+                document.getElementById('passwordInputContainer').classList.remove('hidden');
+                document.getElementById('lockPasswordInput').required = true;
+                submitBtn.textContent = "Kunci PDF";
+                submitBtn.classList.add('bg-slate-900', 'dark:bg-white', 'text-white', 'dark:text-slate-900');
+                submitBtn.classList.remove('bg-green-600', 'text-white');
+                warning.classList.add('hidden');
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                drawer.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function pollSyncStatus(pk) {
+            if (activeIntervals[pk]) return;
+            
+            activeIntervals[pk] = setInterval(async () => {
+                try {
+                    const response = await fetch(`/m/${pk}/status/`);
+                    const data = await response.json();
+                    
+                    if (!data.is_syncing) {
+                        clearInterval(activeIntervals[pk]);
+                        delete activeIntervals[pk];
+                        
+                        const statusCell = document.getElementById(`sync-status-${pk}`);
+                        if (statusCell) {
+                            if (data.drive_file_id) {
+                                statusCell.innerHTML = `
+                                    <span class="material-symbols-outlined text-[12px]">history</span>
+                                    Tersinkronisasi
+                                `;
+                            } else {
+                                statusCell.innerHTML = `
+                                    <span class="material-symbols-outlined text-[12px]">history</span>
+                                    <a href="/m/${pk}/sync/" onclick="event.stopPropagation()" class="text-amber-600 font-bold hover:underline">Lokal (Klik untuk Sinkronisasi)</a>
+                                `;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                }
+            }, 2000);
+        }
+
+        syncingDocs.forEach(pk => pollSyncStatus(pk));
+
+        // Default password backspace behavior
+        document.querySelectorAll('.password-field').forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace') {
+                    const defaultValue = this.getAttribute('data-default');
+                    if (this.value === defaultValue) {
+                        this.value = '';
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
